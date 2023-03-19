@@ -1,0 +1,15 @@
+[package]
+name = "stately"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/Nejat/stately"
+description = "Finite State Machine"
+authors = ["nejatoz@gmail.com"]
+keywords = ["fsm", "finite-state-machine", "state-machine"]
+categories = ["Algorithms", "Rust Patterns"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitflags = "2"
+thiserror = "1"
