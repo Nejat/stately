@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
 use crate::builder::*;
-use crate::builder::types::*;
 use crate::StateMachineBuilder;
 
 pub trait InitialBuilder<TState, TEvent>

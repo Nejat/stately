@@ -2,18 +2,26 @@ use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::hash::Hash;
 
+use bitflags::bitflags;
+
 use build_rules::*;
 use error::BuilderError;
 use result::Result;
-use types::NodeType;
 
 use crate::state_machine::{FiniteStateMachine, StateMachine};
 
 pub mod build_rules;
 pub mod error;
 mod result;
-mod types;
 
+bitflags! {
+    #[derive(Copy, Clone)]
+    pub struct NodeType: u8 {
+        const END   = 0b10;
+        const START = 0b01;
+        const STATE = 0b00;
+    }
+}
 pub struct StateMachineBuilder<TState, TEvent> {
     current: TState,
     initial_state: TState,
