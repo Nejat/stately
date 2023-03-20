@@ -90,12 +90,27 @@ impl<TState, TEvent> StateMachine<TState, TEvent>
         transition
     }
 
+    pub fn has_trigger(&self) -> bool {
+        self.triggers.contains_key(&self.current_state)
+    }
+
     pub fn is_start(&self) -> bool {
         self.start_states.contains(&self.current_state)
     }
 
     pub fn is_end(&self) -> bool {
         self.end_states.contains(&self.current_state)
+    }
+
+    pub fn next_states(&self) -> Option<impl Iterator<Item=(&TEvent, &TState)>> {
+        if self.is_end() {
+            None
+        } else {
+            Some(self.transitions
+                .get(&self.current_state)
+                .expect("all states to have an event transition")
+                .iter())
+        }
     }
 
     pub fn start(&mut self, event: TEvent) -> TState {
