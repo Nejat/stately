@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::hash::Hash;
 
 use crate::builder::*;
@@ -50,8 +51,33 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
 
     #[inline]
     fn build(self) -> Result<StateMachine<TState, TEvent>, TState, TEvent> {
-        // todo: VALIDATE!
+        let danglers = self.machine
+            .states.iter()
+            .filter(|state|
+                !self.machine.transitions.contains_key(state) &&
+                    !self.machine.end_states.contains(state)
+            )
+            .copied()
+            .collect::<HashSet<_>>().into_iter()
+            .collect::<Vec<_>>();
 
-        Ok(self.machine)
+        let no_end_states = self.machine.end_states.is_empty();
+
+        let undefined_states = self.machine
+            .transitions.iter()
+            .flat_map(|(_, itms)| itms.values().collect::<Vec<_>>())
+            .filter(|state| !self.machine.states.contains(state)).copied()
+            .collect::<HashSet<_>>().into_iter()
+            .collect::<Vec<_>>();
+
+        if danglers.is_empty() && undefined_states.is_empty() {
+            Ok(self.machine)
+        } else {
+            Err(BuilderError::ValidationError {
+                no_end_states,
+                danglers,
+                undefined_states,
+            })
+        }
     }
 }

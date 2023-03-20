@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 
 use thiserror::Error;
 
@@ -10,10 +10,15 @@ pub enum BuilderError<TState, TEvent> {
         event: TEvent,
         existing: TState,
     },
+    ValidationError {
+        danglers: Vec<TState>,
+        no_end_states: bool,
+        undefined_states: Vec<TState>,
+    },
 }
 
 impl<TState, TEvent> Display for BuilderError<TState, TEvent>
-    where TState: Display,
+    where TState: Debug + Display,
           TEvent: Display,
 {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
@@ -26,6 +31,33 @@ impl<TState, TEvent> Display for BuilderError<TState, TEvent>
 
             Self::TransitionAlreadyDefined { event, existing } =>
                 fmt.write_fmt(format_args!("{event} event already transitions to {existing}")),
+
+            Self::ValidationError { danglers, no_end_states, undefined_states } => {
+                let has_danglers = !danglers.is_empty();
+                let has_undefined_states = !undefined_states.is_empty();
+
+                if *no_end_states {
+                    fmt.write_fmt(format_args!("No end states"))?;
+
+                    if has_danglers || has_undefined_states {
+                        fmt.write_fmt(format_args!(", "))?;
+                    }
+                }
+
+                if has_danglers {
+                    fmt.write_fmt(format_args!("Dangling state(s) without transition(s) {danglers:?}"))?;
+
+                    if has_undefined_states {
+                        fmt.write_fmt(format_args!(", "))?;
+                    }
+                }
+
+                if has_undefined_states {
+                    fmt.write_fmt(format_args!("Undefined state(s) {undefined_states:?}"))?;
+                }
+
+                Ok(())
+            }
         }
     }
 }
