@@ -1,7 +1,8 @@
 pub use builder::TriggerBuilder;
+pub use end::TriggerEndBuilder;
 pub use multi::MultiTriggerBuilder;
-pub use trigger::TriggerEndBuilder;
 
 mod builder;
 mod multi;
-mod trigger;
+mod end;
+mod end_multi;

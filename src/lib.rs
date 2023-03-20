@@ -13,6 +13,7 @@
 // temporary dispensation from the pope
 #![allow(missing_docs)]
 #![allow(clippy::missing_errors_doc)]
+#![allow(clippy::cargo_common_metadata)]
 
 pub use builder::build_rules;
 pub use builder::StateMachineBuilder;

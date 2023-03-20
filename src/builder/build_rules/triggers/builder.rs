@@ -4,15 +4,15 @@ use crate::builder::build_rules::{MultiTriggerBuilder, TransitionBuilder, Trigge
 use crate::StateMachineBuilder;
 
 pub trait TriggerBuilder<TState, TEvent> {
-    type TriggerBuilder: TriggerEndBuilder<TState, TEvent>;
+    type EndBuilder: TriggerEndBuilder<TState, TEvent>;
+    type MultiBuilder: MultiTriggerBuilder<TState, TEvent>;
     type TransitionBuilder: TransitionBuilder<TState, TEvent>;
-    type MultiTriggerBuilder: MultiTriggerBuilder<TState, TEvent>;
 
     #[must_use]
-    fn also_end_state(self) -> Self::TriggerBuilder;
+    fn also_end_state(self) -> Self::EndBuilder;
 
     #[must_use]
-    fn on_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiTriggerBuilder;
+    fn on_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder;
 
     #[must_use]
     fn no_triggers(self) -> Self::TransitionBuilder;
@@ -25,18 +25,18 @@ impl<TState, TEvent> TriggerBuilder<TState, TEvent> for StateMachineBuilder<TSta
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type TriggerBuilder = StateMachineBuilder<TState, TEvent>;
+    type EndBuilder = StateMachineBuilder<TState, TEvent>;
+    type MultiBuilder = StateMachineBuilder<TState, TEvent>;
     type TransitionBuilder = StateMachineBuilder<TState, TEvent>;
-    type MultiTriggerBuilder = StateMachineBuilder<TState, TEvent>;
 
-    fn also_end_state(mut self) -> Self::TriggerBuilder {
+    fn also_end_state(mut self) -> Self::EndBuilder {
         self.also_end_state_impl(self.current);
 
         self
     }
 
     #[inline]
-    fn on_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiTriggerBuilder {
+    fn on_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder {
         self.trigger_on_impl(self.current, trigger);
 
         self

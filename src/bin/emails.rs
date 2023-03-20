@@ -36,7 +36,6 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
             .final_transition_on(Process, Processing)?
         .add_end_state(Canceled)?
             .only_trigger(completed)
-            .no_transitions()
         .add_state(Processing)?
             .only_trigger(transitioned)
             .transition_on(Succeed, Sent)?
@@ -50,14 +49,11 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
             .final_transition_on(Fail, Failed)?
         .add_end_state(Successful)?
             .only_trigger(completed)
-            .no_transitions()
         .add_end_state(Failed)?
             .only_trigger(completed)
-            .no_transitions()
         .add_start_state(InvalidRequest, Invalid)?
-        .also_end_state()
+            .also_end_state()
             .only_trigger(start_completed)
-            .no_transitions()
         .build()?;
 
     let current_state = *email_state;

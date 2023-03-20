@@ -8,14 +8,14 @@ use crate::StateMachineBuilder;
 pub trait TransitionBuilder<TState, TEvent>
     where Self: Sized
 {
-    type MultiTransitionBuilder: MultiTransitionBuilder<TState, TEvent>;
+    type MultiBuilder: MultiTransitionBuilder<TState, TEvent>;
     type StateBuilder: StateBuilder<TState, TEvent>;
 
     fn transition_on(
         self,
         event: TEvent,
         next_state: TState,
-    ) -> Result<Self::MultiTransitionBuilder, TState, TEvent>;
+    ) -> Result<Self::MultiBuilder, TState, TEvent>;
 
     fn no_transitions(self) -> Self::StateBuilder;
 
@@ -30,7 +30,7 @@ impl<TState, TEvent> TransitionBuilder<TState, TEvent> for StateMachineBuilder<T
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type MultiTransitionBuilder = StateMachineBuilder<TState, TEvent>;
+    type MultiBuilder = StateMachineBuilder<TState, TEvent>;
     type StateBuilder = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
@@ -38,7 +38,7 @@ impl<TState, TEvent> TransitionBuilder<TState, TEvent> for StateMachineBuilder<T
         mut self,
         event: TEvent,
         next_state: TState,
-    ) -> Result<Self::MultiTransitionBuilder, TState, TEvent> {
+    ) -> Result<Self::MultiBuilder, TState, TEvent> {
         self.add_transition_impl(self.current, event, next_state).map(|_| self)
     }
 

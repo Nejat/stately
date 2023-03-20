@@ -6,9 +6,10 @@ use crate::StateMachineBuilder;
 pub trait StateBuilder<TState, TEvent>
     where Self: Sized
 {
+    type EndBuilder: TriggerEndBuilder<TState, TEvent>;
     type TriggerBuilder: TriggerBuilder<TState, TEvent>;
 
-    fn add_end_state(self, end_state: TState) -> Result<Self::TriggerBuilder, TState, TEvent>;
+    fn add_end_state(self, end_state: TState) -> Result<Self::EndBuilder, TState, TEvent>;
 
     fn add_start_state(
         self,
@@ -25,6 +26,7 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
+    type EndBuilder = StateMachineBuilder<TState, TEvent>;
     type TriggerBuilder = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
