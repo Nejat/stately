@@ -52,24 +52,24 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
 
     #[inline]
     fn build(self) -> Result<StateMachineDefinition<TState, TEvent>, TState, TEvent> {
-        let danglers = self            .states.iter()
-            .filter(|state|
-                !self.transitions.contains_key(state) &&
-                    !self.end_states.contains(state)
-            )
-            .copied()
-            .collect::<HashSet<_>>().into_iter()
-            .collect::<Vec<_>>();
+        // let danglers = self.states.iter()
+        //     .filter(|state|
+        //         !self.transitions.contains_key(state) &&
+        //             !self.end_states.contains(state)
+        //     )
+        //     .copied()
+        //     .collect::<HashSet<_>>().into_iter()
+        //     .collect::<Vec<_>>();
 
         let no_end_states = self.end_states.is_empty();
 
-        let undefined_states = self            .transitions.iter()
+        let undefined_states = self.transitions.iter()
             .flat_map(|(_, itms)| itms.values().collect::<Vec<_>>())
             .filter(|state| !self.states.contains(state)).copied()
             .collect::<HashSet<_>>().into_iter()
             .collect::<Vec<_>>();
 
-        if danglers.is_empty() && undefined_states.is_empty() {
+        if !no_end_states && undefined_states.is_empty() {
             Ok(StateMachineDefinition {
                 end_states: Rc::new(self.end_states),
                 initial_state: self.initial_state,
@@ -81,7 +81,6 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
         } else {
             Err(BuilderError::ValidationError {
                 no_end_states,
-                danglers,
                 undefined_states,
             })
         }

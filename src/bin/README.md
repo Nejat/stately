@@ -19,6 +19,37 @@ flowchart LR
     C --> Z
 ```
 
+```rust
+    let email_state_machine = StateMachineBuilder::new(Initial)
+        .add_start_state(Schedule, Scheduled)?
+            .no_triggers()
+            .transition_on(Cancel, Canceled)?
+            .final_transition_on(Process, Processing)?
+        .add_end_state(Canceled)?
+            .no_triggers()
+        .add_state(Processing)?
+            .no_triggers()
+            .transition_on(Succeed, Sent)?
+            .final_transition_on(Fail, Failed)?
+        .add_state(Sent)?
+            .no_triggers()
+            .only_transition_on(Verify, Verifying)?
+        .add_state(Verifying)?
+            .no_triggers()
+            .transition_on(Succeed, Successful)?
+            .final_transition_on(Fail, Failed)?
+        .add_end_state(Successful)?
+            .no_triggers()
+        .add_end_state(Failed)?
+            .no_triggers()
+        .add_start_state(InvalidRequest, Invalid)?
+            .also_end_state()
+            .no_triggers()
+        .build()?;
+
+    let mut email_state = email_state_machine.create();
+```
+
 ## Example
 
 Run example using

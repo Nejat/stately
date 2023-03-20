@@ -69,8 +69,7 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
     }
 
     fn event(&mut self, event: TEvent) -> TState {
-        let transitions = &self
-            .definition
+        let transitions = &self.definition
             .transitions.get(&self.current_state)
             .expect("a transition for event for current state");
 

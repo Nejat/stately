@@ -17,8 +17,6 @@ pub trait TransitionBuilder<TState, TEvent>
         next_state: TState,
     ) -> Result<Self::MultiBuilder, TState, TEvent>;
 
-    fn no_transitions(self) -> Self::StateBuilder;
-
     fn only_transition_on(
         self,
         event: TEvent,
@@ -40,11 +38,6 @@ impl<TState, TEvent> TransitionBuilder<TState, TEvent> for StateMachineBuilder<T
         next_state: TState,
     ) -> Result<Self::MultiBuilder, TState, TEvent> {
         self.add_transition_impl(self.current, event, next_state).map(|_| self)
-    }
-
-    #[inline]
-    fn no_transitions(self) -> Self::StateBuilder {
-        self as StateMachineBuilder<TState, TEvent>
     }
 
     #[inline]
