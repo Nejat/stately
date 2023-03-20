@@ -20,9 +20,9 @@ pub trait FiniteStateMachine<TState, TEvent>: Deref {
 
     fn has_trigger(&self) -> bool;
 
-    fn is_start(&self) -> bool;
-
     fn is_end(&self) -> bool;
+
+    fn is_start(&self) -> bool;
 
     fn new_triggers(&mut self, triggers: Vec<(TState, Vec<Triggers<TState, TEvent>>)>);
 
@@ -91,12 +91,18 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
         self.definition.triggers.contains_key(&self.current_state)
     }
 
+    fn is_end(&self) -> bool {
+        self.definition.end_states.contains(&self.current_state)
+    }
+
     fn is_start(&self) -> bool {
         self.definition.start_states.contains(&self.current_state)
     }
 
-    fn is_end(&self) -> bool {
-        self.definition.end_states.contains(&self.current_state)
+    fn new_triggers(&mut self, triggers: Vec<(TState, Vec<Triggers<TState, TEvent>>)>) {
+        self.clear_triggers();
+
+        self.definition.triggers = Rc::new(triggers.into_iter().collect());
     }
 
     fn next_states<'a>(&'a self) -> Box<dyn Iterator<Item=(&'a TEvent, &'a TState)> + 'a> {
@@ -122,12 +128,6 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
         self.current_state = self.definition.initial_state;
 
         self.event(event)
-    }
-
-    fn new_triggers(&mut self, triggers: Vec<(TState, Vec<Triggers<TState, TEvent>>)>) {
-        self.clear_triggers();
-
-        self.definition.triggers = Rc::new(triggers.into_iter().collect());
     }
 }
 

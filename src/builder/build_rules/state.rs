@@ -74,7 +74,6 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
                 end_states: Rc::new(self.end_states),
                 initial_state: self.initial_state,
                 start_states: Rc::new(self.start_states),
-                states: Rc::new(self.states),
                 transitions: Rc::new(self.transitions),
                 triggers: Rc::new(self.triggers),
             })
