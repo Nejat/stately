@@ -1,8 +1,25 @@
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+use std::iter::empty;
 use std::ops::Deref;
 
 use crate::Triggers;
+
+pub trait FiniteStateMachine<TState, TEvent> {
+    fn new(initial_state: TState) -> Self;
+
+    fn event(&mut self, event: TEvent) -> TState;
+
+    fn has_trigger(&self) -> bool;
+
+    fn is_start(&self) -> bool;
+
+    fn is_end(&self) -> bool;
+
+    fn next_states<'a>(&'a self) -> Box<dyn Iterator<Item=(&'a TEvent, &'a TState)> + 'a>;
+
+    fn start(&mut self, event: TEvent) -> TState;
+}
 
 pub struct StateMachine<TState, TEvent> {
     pub(crate) current_state: TState,
@@ -22,44 +39,11 @@ impl<TState, TEvent> Deref for StateMachine<TState, TEvent> {
     }
 }
 
-/*
-
-// pub type Result<T, TState, TEvent> = std::result::Result<T, StateError<TState, TEvent>>;
-
-#[derive(Error, Debug)]
-pub enum StateError<TState, TEvent> {
-    NoStartTransitions,
-    StateAlreadyDefined(TState),
-    TransitionAlreadyDefined {
-        event: TEvent,
-        existing: TState,
-    },
-}
-
-impl<TState, TEvent> Display for StateError<TState, TEvent>
-    where TState: Display,
-          TEvent: Display,
-{
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::NoStartTransitions =>
-                fmt.write_fmt(format_args!("No Start Trans")),
-
-            Self::StateAlreadyDefined(defined) =>
-                fmt.write_fmt(format_args!("{defined} state has already been defined")),
-
-            Self::TransitionAlreadyDefined { event, existing } =>
-                fmt.write_fmt(format_args!("{event} event already transitions to {existing}")),
-        }
-    }
-}
-*/
-
-impl<TState, TEvent> StateMachine<TState, TEvent>
+impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState, TEvent>
     where TState: Copy + Eq + Hash,
           TEvent: Copy + Eq + Hash
 {
-    pub fn new(initial_state: TState) -> Self {
+    fn new(initial_state: TState) -> Self {
         Self {
             current_state: initial_state,
             end_states: HashSet::default(),
@@ -71,7 +55,7 @@ impl<TState, TEvent> StateMachine<TState, TEvent>
         }
     }
 
-    pub fn event(&mut self, event: TEvent) -> TState {
+    fn event(&mut self, event: TEvent) -> TState {
         let transitions = &self
             .transitions.get(&self.current_state)
             .expect("a transition for event for current state");
@@ -90,30 +74,30 @@ impl<TState, TEvent> StateMachine<TState, TEvent>
         transition
     }
 
-    pub fn has_trigger(&self) -> bool {
+    fn has_trigger(&self) -> bool {
         self.triggers.contains_key(&self.current_state)
     }
 
-    pub fn is_start(&self) -> bool {
+    fn is_start(&self) -> bool {
         self.start_states.contains(&self.current_state)
     }
 
-    pub fn is_end(&self) -> bool {
+    fn is_end(&self) -> bool {
         self.end_states.contains(&self.current_state)
     }
 
-    pub fn next_states(&self) -> Option<impl Iterator<Item=(&TEvent, &TState)>> {
+    fn next_states<'a>(&'a self) -> Box<dyn Iterator<Item=(&'a TEvent, &'a TState)> + 'a> {
         if self.is_end() {
-            None
+            Box::new(empty())
         } else {
-            Some(self.transitions
+            Box::new(self.transitions
                 .get(&self.current_state)
                 .expect("all states to have an event transition")
                 .iter())
         }
     }
 
-    pub fn start(&mut self, event: TEvent) -> TState {
+    fn start(&mut self, event: TEvent) -> TState {
         self.current_state = self.initial_state;
 
         self.event(event)

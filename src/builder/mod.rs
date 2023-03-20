@@ -7,7 +7,7 @@ use error::BuilderError;
 use result::Result;
 use types::NodeType;
 
-use crate::state_machine::StateMachine;
+use crate::state_machine::{FiniteStateMachine, StateMachine};
 
 pub mod build_rules;
 pub mod error;

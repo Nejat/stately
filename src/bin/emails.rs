@@ -118,7 +118,7 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
     assert_eq!(Successful, current_state);
     assert!(email_state.is_end());
     assert!(email_state.has_trigger());
-    assert!(email_state.next_states().is_none());
+    assert_eq!(email_state.next_states().count(), 0);
 
     let current_state = email_state.start(InvalidRequest);
 
@@ -126,7 +126,7 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
     assert!(email_state.is_start());
     assert!(email_state.is_end());
     assert!(email_state.has_trigger());
-    assert!(email_state.next_states().is_none());
+    assert_eq!(email_state.next_states().count(), 0);
 
     return Ok(());
 
@@ -150,10 +150,6 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
         expected: &[(&EmailEvent, &EMailState)],
         sut: &StateMachine<EMailState, EmailEvent>,
     ) {
-        assert!(
-            sut.next_states()
-                .unwrap()
-                .all(|itm| expected.contains(&itm))
-        );
+        assert!(sut.next_states().all(|itm| expected.contains(&itm)));
     }
 }

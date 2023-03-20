@@ -30,5 +30,5 @@ pub mod prelude {
     pub use super::builder::build_rules::*;
     pub use super::builder::error::BuilderError;
     pub use super::builder::StateMachineBuilder;
-    pub use super::state_machine::StateMachine;
+    pub use super::state_machine::{FiniteStateMachine, StateMachine};
 }
