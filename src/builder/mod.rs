@@ -1,5 +1,5 @@
 use std::borrow::BorrowMut;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 use bitflags::bitflags;
@@ -8,7 +8,8 @@ use build_rules::*;
 use error::BuilderError;
 use result::Result;
 
-use crate::state_machine::{FiniteStateMachine, StateMachine};
+use crate::state_machine::StateMachineDefinition;
+use crate::Triggers;
 
 pub mod build_rules;
 pub mod error;
@@ -25,7 +26,11 @@ bitflags! {
 pub struct StateMachineBuilder<TState, TEvent> {
     current: TState,
     initial_state: TState,
-    machine: StateMachine<TState, TEvent>,
+    end_states: HashSet<TState>,
+    start_states: HashSet<TState>,
+    states: HashSet<TState>,
+    transitions: HashMap<TState, HashMap<TEvent, TState>>,
+    triggers: HashMap<TState, Vec<Triggers<TState, TEvent>>>,
 }
 
 impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
@@ -38,7 +43,11 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
         Self {
             current: initial_state,
             initial_state,
-            machine: StateMachine::new(initial_state),
+            end_states: HashSet::default(),
+            start_states: HashSet::default(),
+            states: HashSet::default(),
+            transitions: HashMap::default(),
+            triggers: HashMap::default(),
         }
     }
 }
@@ -49,7 +58,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
 {
     fn also_end_state_impl(&mut self, state: TState)
     {
-        self.machine.end_states.borrow_mut().insert(state);
+        self.end_states.borrow_mut().insert(state);
     }
 
     fn add_state_impl(
@@ -57,22 +66,22 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
         state: TState,
         r#type: NodeType,
     ) -> Result<(), TState, TEvent> {
-        if state == self.machine.initial_state {
+        if state == self.initial_state {
             return Err(BuilderError::StateAlreadyDefined(state));
         }
 
-        if self.machine.states.contains(&state) {
+        if self.states.contains(&state) {
             return Err(BuilderError::StateAlreadyDefined(state));
         }
 
-        self.machine.states.borrow_mut().insert(state);
+        self.states.borrow_mut().insert(state);
 
         if r#type.contains(NodeType::END) {
-            self.machine.end_states.borrow_mut().insert(state);
+            self.end_states.borrow_mut().insert(state);
         }
 
         if r#type.contains(NodeType::START) {
-            self.machine.start_states.borrow_mut().insert(state);
+            self.start_states.borrow_mut().insert(state);
         }
 
         self.current = state;
@@ -99,8 +108,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
         event: TEvent,
         next_state: TState,
     ) -> Result<(), TState, TEvent> {
-        let entry = self.machine
-            .transitions.entry(state)
+        let entry = self.transitions.entry(state)
             .or_insert_with(HashMap::new);
 
         if entry.contains_key(&event) {
@@ -118,8 +126,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
     }
 
     fn trigger_on_impl(&mut self, state: TState, trigger: impl Fn(TEvent, TState, TState) + 'static) {
-        self.machine
-            .triggers.entry(state)
+        self.triggers.entry(state)
             .or_insert_with(Vec::new)
             .push(Box::new(trigger));
     }

@@ -12,7 +12,7 @@ pub trait TriggerBuilder<TState, TEvent> {
     fn also_end_state(self) -> Self::EndBuilder;
 
     #[must_use]
-    fn on_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder;
+    fn trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder;
 
     #[must_use]
     fn no_triggers(self) -> Self::TransitionBuilder;
@@ -36,7 +36,7 @@ impl<TState, TEvent> TriggerBuilder<TState, TEvent> for StateMachineBuilder<TSta
     }
 
     #[inline]
-    fn on_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder {
+    fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder {
         self.trigger_on_impl(self.current, trigger);
 
         self

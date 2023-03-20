@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::rc::Rc;
 
 use crate::builder::*;
 use crate::StateMachineBuilder;
@@ -20,7 +21,7 @@ pub trait StateBuilder<TState, TEvent>
 
     fn add_state(self, state: TState) -> Result<Self::TriggerBuilder, TState, TEvent>;
 
-    fn build(self) -> Result<StateMachine<TState, TEvent>, TState, TEvent>;
+    fn build(self) -> Result<StateMachineDefinition<TState, TEvent>, TState, TEvent>;
 }
 
 impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState, TEvent>
@@ -50,28 +51,33 @@ impl<TState, TEvent> StateBuilder<TState, TEvent> for StateMachineBuilder<TState
     }
 
     #[inline]
-    fn build(self) -> Result<StateMachine<TState, TEvent>, TState, TEvent> {
-        let danglers = self.machine
-            .states.iter()
+    fn build(self) -> Result<StateMachineDefinition<TState, TEvent>, TState, TEvent> {
+        let danglers = self            .states.iter()
             .filter(|state|
-                !self.machine.transitions.contains_key(state) &&
-                    !self.machine.end_states.contains(state)
+                !self.transitions.contains_key(state) &&
+                    !self.end_states.contains(state)
             )
             .copied()
             .collect::<HashSet<_>>().into_iter()
             .collect::<Vec<_>>();
 
-        let no_end_states = self.machine.end_states.is_empty();
+        let no_end_states = self.end_states.is_empty();
 
-        let undefined_states = self.machine
-            .transitions.iter()
+        let undefined_states = self            .transitions.iter()
             .flat_map(|(_, itms)| itms.values().collect::<Vec<_>>())
-            .filter(|state| !self.machine.states.contains(state)).copied()
+            .filter(|state| !self.states.contains(state)).copied()
             .collect::<HashSet<_>>().into_iter()
             .collect::<Vec<_>>();
 
         if danglers.is_empty() && undefined_states.is_empty() {
-            Ok(self.machine)
+            Ok(StateMachineDefinition {
+                end_states: Rc::new(self.end_states),
+                initial_state: self.initial_state,
+                start_states: Rc::new(self.start_states),
+                states: Rc::new(self.states),
+                transitions: Rc::new(self.transitions),
+                triggers: Rc::new(self.triggers),
+            })
         } else {
             Err(BuilderError::ValidationError {
                 no_end_states,

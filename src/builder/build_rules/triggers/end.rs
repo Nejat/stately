@@ -9,7 +9,7 @@ pub trait TriggerEndBuilder<TState, TEvent> {
     type MultiBuilder: MultiTriggerEndBuilder<TState, TEvent>;
 
     #[must_use]
-    fn on_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder;
+    fn trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder;
 
     #[must_use]
     fn no_triggers(self) -> Self::StateBuilder;
@@ -26,7 +26,7 @@ impl<TState, TEvent> TriggerEndBuilder<TState, TEvent> for StateMachineBuilder<T
     type MultiBuilder = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
-    fn on_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder {
+    fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiBuilder {
         self.trigger_on_impl(self.current, trigger);
 
         self
