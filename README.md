@@ -13,7 +13,7 @@ Initial poc of finite-state-machine defined with an ergonomic builder and soon w
 * [x] ~~Refactor; separate out state machine definite, into singleton, from actual state instance~~
 * [x] ~~Refactor; Add re-trigger implementation to state instance~~
 * [x] ~~Refactor; apply stricter clippy rules; a.k.a "Clippify" project~~
-* [ ] Needs better validation; detect infinite loops (valid?)
+* [x] ~~detect cyclical loops~~
 * [ ] Add unit tests
 * [ ] Rust Docs
 * [ ] Add more examples

@@ -1,16 +1,23 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::empty;
 use std::ops::Deref;
 use std::rc::Rc;
 
 pub use definition::StateMachineDefinition;
+
+use crate::graph::Graph;
 use crate::Triggers;
 
 mod definition;
 
 pub trait FiniteStateMachine<TState, TEvent>: Deref {
     fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self;
+
+    fn has_cycles(&mut self) -> Option<bool> {
+        None
+    }
 
     fn clear_triggers(&mut self);
 
@@ -35,7 +42,8 @@ pub trait FiniteStateMachine<TState, TEvent>: Deref {
 
 pub struct StateMachine<TState, TEvent> {
     pub(crate) current_state: TState,
-    pub(crate) definition: StateMachineDefinition<TState, TEvent>
+    pub(crate) has_cycle: Option<bool>,
+    pub(crate) definition: StateMachineDefinition<TState, TEvent>,
 }
 
 impl<TState, TEvent> Deref for StateMachine<TState, TEvent>
@@ -50,14 +58,21 @@ impl<TState, TEvent> Deref for StateMachine<TState, TEvent>
 }
 
 impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState, TEvent>
-    where TState: Copy + Eq + Hash,
+    where TState: Copy + Debug + Eq + Hash + PartialOrd + 'static,
           TEvent: Copy + Eq + Hash
 {
     fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self {
         Self {
             current_state: definition.initial_state,
+            has_cycle: None,
             definition,
         }
+    }
+
+    fn has_cycles(&mut self) -> Option<bool> {
+        self.has_cycle.get_or_insert(detect_cycles(&self.definition));
+
+        self.has_cycle
     }
 
     fn clear_triggers(&mut self) {
@@ -131,3 +146,18 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
     }
 }
 
+pub fn detect_cycles<TState, TEvent>(fsm: &StateMachineDefinition<TState, TEvent>) -> bool
+    where TState: Copy + Debug + Eq + Hash + PartialOrd + 'static
+{
+    let mut graph = <Graph<TState>>::new(fsm.transitions.keys().chain(fsm.end_states.iter()).copied());
+
+    for node in fsm.transitions.keys().copied() {
+        let edges = fsm.transitions.get(&node).expect("every node requires a transition");
+
+        for (_, edge) in edges.iter() {
+            graph.add_edge(node, *edge);
+        }
+    }
+
+    graph.is_cyclical()
+}

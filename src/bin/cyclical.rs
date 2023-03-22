@@ -1,64 +1,67 @@
 use stately::prelude::*;
 
-use crate::EmailEvent::*;
-use crate::EMailState::*;
+use crate::Event::*;
+use crate::State::*;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, PartialOrd)]
-pub enum EmailEvent {
-    Cancel,
-    InvalidRequest,
-    Process,
-    Fail,
-    Succeed,
-    Schedule,
-    Verify,
+pub enum Event {
+    Done,
+    Loop,
+    Next,
+    Skip,
+    Start,
 }
 
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash, PartialOrd)]
-enum EMailState {
-    Canceled,
-    Failed,
+enum State {
     #[default]
     Initial,
-    Invalid,
-    Processing,
-    Scheduled,
-    Sent,
-    Successful,
-    Verifying,
+    A,
+    B,
+    B1,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
 }
 
-fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
+fn main() -> Result<(), BuilderError<State, Event>> {
     let email_state_machine = StateMachineBuilder::new(Initial)
-        .add_start_state(Schedule, Scheduled)?
+        .add_start_state(Start, A)?
             .only_trigger(started)
-            .transition_on(Cancel, Canceled)?
-            .final_transition_on(Process, Processing)?
-        .add_end_state(Canceled)?
+            .transition_on(Done, E)?
+            .final_transition_on(Next, B)?
+        .add_end_state(E)?
             .only_trigger(completed)
-        .add_state(Processing)?
+        .add_state(B)?
             .only_trigger(transitioned)
-            .transition_on(Succeed, Sent)?
-            .final_transition_on(Fail, Failed)?
-        .add_state(Sent)?
+            .transition_on(Next, C)?
+            .transition_on(Loop, B1)?
+            .final_transition_on(Done, G)?
+        .add_state(B1)?
             .only_trigger(transitioned)
-            .only_transition_on(Verify, Verifying)?
-        .add_state(Verifying)?
+            .only_transition_on(Loop, B1)?
+        .add_state(C)?
             .only_trigger(transitioned)
-            .transition_on(Succeed, Successful)?
-            .final_transition_on(Fail, Failed)?
-        .add_end_state(Successful)?
+            .only_transition_on(Next, D)?
+        .add_state(D)?
+            .only_trigger(transitioned)
+            .transition_on(Next, F)?
+            .final_transition_on(Done, G)?
+        .add_end_state(F)?
             .only_trigger(completed)
-        .add_end_state(Failed)?
+        .add_end_state(G)?
             .only_trigger(completed)
-        .add_start_state(InvalidRequest, Invalid)?
+        .add_start_state(Skip, H)?
             .also_end_state()
             .only_trigger(start_completed)
         .build()?;
 
     let mut email_state = email_state_machine.create();
 
-    assert!(!email_state.has_cycles().expect("detect cycles should be implemented"));
+    assert!(email_state.has_cycles().expect("detect cycles should be implemented"));
 
     demonstrate_state_machine(&mut email_state, Triggers::Yes);
 
@@ -72,10 +75,10 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
     email_state.reset();
     email_state.new_triggers(
         vec![
-            (Successful, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
-            (Invalid, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
-            (Failed, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
-            (Canceled, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
+            (F, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
+            (H, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
+            (G, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
+            (E, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
         ]
     );
 
@@ -83,19 +86,19 @@ fn main() -> Result<(), BuilderError<EMailState, EmailEvent>> {
 
     return Ok(());
 
-    fn completed(event: EmailEvent, _state: EMailState, status: EMailState) {
+    fn completed(event: Event, _state: State, status: State) {
         println!(" ━ |{event:?}| → {status:?} ●")
     }
 
-    fn start_completed(event: EmailEvent, _state: EMailState, status: EMailState) {
+    fn start_completed(event: Event, _state: State, status: State) {
         println!("◉ |{event:?}| → {status:?} ●")
     }
 
-    fn started(event: EmailEvent, _prior_state: EMailState, state: EMailState) {
+    fn started(event: Event, _prior_state: State, state: State) {
         print!("◉ |{event:?}| → {state:?}")
     }
 
-    fn transitioned(event: EmailEvent, _prior_state: EMailState, state: EMailState) {
+    fn transitioned(event: Event, _prior_state: State, state: State) {
         print!(" ━ |{event:?}| → {state:?}")
     }
 }
@@ -108,7 +111,7 @@ enum Triggers {
 }
 
 fn demonstrate_state_machine(
-    email_state: &mut impl FiniteStateMachine<EMailState, EmailEvent>,
+    email_state: &mut impl FiniteStateMachine<State, Event>,
     triggers: Triggers,
 )
 {
@@ -117,15 +120,15 @@ fn demonstrate_state_machine(
     assert_eq!(Initial, current_state);
 
     let expected = vec![
-        (&Schedule, &Scheduled),
-        (&InvalidRequest, &Invalid),
+        (&Start, &A),
+        (&Skip, &H),
     ];
 
     assert_next_states(&expected, email_state);
 
-    let current_state = email_state.start(Schedule);
+    let current_state = email_state.start(Start);
 
-    assert_eq!(Scheduled, current_state);
+    assert_eq!(A, current_state);
     assert!(email_state.is_start());
 
     if triggers != Triggers::DontCheck {
@@ -133,57 +136,58 @@ fn demonstrate_state_machine(
     }
 
     let expected = vec![
-        (&Process, &Processing),
-        (&Cancel, &Canceled),
+        (&Next, &B),
+        (&Done, &E),
     ];
 
     assert_next_states(&expected, email_state);
 
-    let current_state = email_state.event(Process);
+    let current_state = email_state.event(Next);
 
-    assert_eq!(Processing, current_state);
+    assert_eq!(B, current_state);
 
     if triggers != Triggers::DontCheck {
         assert_eq!(matches!(triggers, Triggers::Yes), email_state.has_trigger());
     }
 
     let expected = vec![
-        (&Succeed, &Sent),
-        (&Fail, &Failed),
+        (&Next, &C),
+        (&Done, &G),
+        (&Loop, &B1),
     ];
 
     assert_next_states(&expected, email_state);
 
-    let current_state = email_state.event(Succeed);
+    let current_state = email_state.event(Next);
 
-    assert_eq!(Sent, current_state);
+    assert_eq!(C, current_state);
 
     if triggers != Triggers::DontCheck {
         assert_eq!(matches!(triggers, Triggers::Yes), email_state.has_trigger());
     }
 
-    let expected = vec![(&Verify, &Verifying)];
+    let expected = vec![(&Next, &D)];
 
     assert_next_states(&expected, email_state);
 
-    let current_state = email_state.event(Verify);
+    let current_state = email_state.event(Next);
 
-    assert_eq!(Verifying, current_state);
+    assert_eq!(D, current_state);
 
     if triggers != Triggers::DontCheck {
         assert_eq!(matches!(triggers, Triggers::Yes), email_state.has_trigger());
     }
 
     let expected = vec![
-        (&Succeed, &Successful),
-        (&Fail, &Failed),
+        (&Next, &F),
+        (&Done, &G),
     ];
 
     assert_next_states(&expected, email_state);
 
-    let current_state = email_state.event(Succeed);
+    let current_state = email_state.event(Next);
 
-    assert_eq!(Successful, current_state);
+    assert_eq!(F, current_state);
     assert!(email_state.is_end());
     assert_eq!(email_state.next_states().count(), 0);
 
@@ -191,9 +195,9 @@ fn demonstrate_state_machine(
         assert_eq!(matches!(triggers, Triggers::Yes), email_state.has_trigger());
     }
 
-    let current_state = email_state.start(InvalidRequest);
+    let current_state = email_state.start(Skip);
 
-    assert_eq!(Invalid, current_state);
+    assert_eq!(H, current_state);
     assert!(email_state.is_start());
     assert!(email_state.is_end());
     assert_eq!(email_state.next_states().count(), 0);
@@ -203,8 +207,8 @@ fn demonstrate_state_machine(
     }
 
     fn assert_next_states(
-        expected: &[(&EmailEvent, &EMailState)],
-        sut: &impl FiniteStateMachine<EMailState, EmailEvent>,
+        expected: &[(&Event, &State)],
+        sut: &impl FiniteStateMachine<State, Event>,
     ) {
         assert!(sut.next_states().all(|itm| expected.contains(&itm)));
     }

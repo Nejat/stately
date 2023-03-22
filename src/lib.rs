@@ -17,14 +17,15 @@
 
 pub use builder::build_rules;
 pub use builder::StateMachineBuilder;
-pub use state_machine::StateMachineDefinition;
+pub use state_machine::{detect_cycles, StateMachineDefinition};
 
 // type TransitionPredicate<TState> = Box<dyn Fn(TState) -> bool>;
 
 type Triggers<TState, TEvent> = Box<dyn Fn(TEvent, TState, TState)>;
 
-mod state_machine;
 mod builder;
+mod graph;
+mod state_machine;
 
 pub mod prelude {
     pub use super::builder::build_rules::*;

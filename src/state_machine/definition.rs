@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
 
@@ -15,7 +16,7 @@ pub struct StateMachineDefinition<TState, TEvent> {
 }
 
 impl<TState, TEvent> StateMachineDefinition<TState, TEvent>
-    where TState: Copy + Eq + Hash,
+    where TState: Copy + Debug + Eq + Hash + PartialOrd + 'static,
           TEvent: Copy + Eq + Hash
 {
     pub fn new(initial_state: TState) -> Self {
