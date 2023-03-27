@@ -4,15 +4,21 @@ use std::hash::Hash;
 
 use bitflags::bitflags;
 
-use build_rules::*;
-use error::BuilderError;
-use result::Result;
+pub use build_states::{
+    BuilderState, EndTriggersState, EndTriggerState, InitialState,
+    TransitionsState, TransitionState, TriggersState, TriggerState,
+};
+pub use error::BuilderError;
+use error::BuilderError::{
+    RedefinedInitialState as InitialStateError, StateAlreadyDefined, TransitionAlreadyDefined,
+};
+pub use result::Result;
 
 use crate::state_machine::StateMachineDefinition;
-use crate::Triggers;
+use crate::Trigger;
 
-pub mod build_rules;
-pub mod error;
+mod build_states;
+mod error;
 mod result;
 
 bitflags! {
@@ -23,6 +29,7 @@ bitflags! {
         const STATE = 0b00;
     }
 }
+
 pub struct StateMachineBuilder<TState, TEvent> {
     current: TState,
     initial_state: TState,
@@ -30,7 +37,7 @@ pub struct StateMachineBuilder<TState, TEvent> {
     start_states: HashSet<TState>,
     states: HashSet<TState>,
     transitions: HashMap<TState, HashMap<TEvent, TState>>,
-    triggers: HashMap<TState, Vec<Triggers<TState, TEvent>>>,
+    triggers: HashMap<TState, Vec<Trigger<TState, TEvent>>>,
 }
 
 impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
@@ -38,8 +45,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
           TEvent: Copy + Eq + Hash
 {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(initial_state: TState) -> impl InitialBuilder<TState, TEvent>
-    {
+    pub fn new(initial_state: TState) -> impl InitialState<TState, TEvent> {
         Self {
             current: initial_state,
             initial_state,
@@ -56,22 +62,17 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash
 {
-    fn also_end_state_impl(&mut self, state: TState)
-    {
-        self.end_states.borrow_mut().insert(state);
-    }
-
     fn add_state_impl(
         &mut self,
         state: TState,
         r#type: NodeType,
     ) -> Result<(), TState, TEvent> {
         if state == self.initial_state {
-            return Err(BuilderError::StateAlreadyDefined(state));
+            return Err(InitialStateError);
         }
 
         if self.states.contains(&state) {
-            return Err(BuilderError::StateAlreadyDefined(state));
+            return Err(StateAlreadyDefined { state });
         }
 
         self.states.borrow_mut().insert(state);
@@ -89,17 +90,30 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
         Ok(())
     }
 
+    fn add_start_end_state_impl(
+        &mut self,
+        initial_state: TState,
+        start_end_event: TEvent,
+        start_end_state: TState,
+    ) -> Result<(), TState, TEvent> {
+        self.add_state_impl(start_end_state, NodeType::START | NodeType::END)?;
+
+        self.current = start_end_state;
+
+        self.add_transition_impl(initial_state, start_end_event, start_end_state)
+    }
+
     fn add_start_state_impl(
         &mut self,
         initial_state: TState,
-        start_start_event: TEvent,
+        start_event: TEvent,
         start_state: TState,
     ) -> Result<(), TState, TEvent> {
         self.add_state_impl(start_state, NodeType::START)?;
 
         self.current = start_state;
 
-        self.add_transition_impl(initial_state, start_start_event, start_state)
+        self.add_transition_impl(initial_state, start_event, start_state)
     }
 
     fn add_transition_impl(
@@ -114,10 +128,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
         if entry.contains_key(&event) {
             let existing = entry[&event];
 
-            return Err(BuilderError::TransitionAlreadyDefined {
-                event,
-                existing,
-            });
+            return Err(TransitionAlreadyDefined { event, existing });
         }
 
         entry.borrow_mut().insert(event, next_state);

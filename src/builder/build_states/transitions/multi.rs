@@ -1,13 +1,13 @@
 use std::hash::Hash;
 
-use crate::build_rules::StateBuilder;
-use crate::builder::result::Result;
+use crate::builder::BuilderState;
+use crate::builder::Result;
 use crate::StateMachineBuilder;
 
-pub trait MultiTransitionBuilder<TState, TEvent>
+pub trait TransitionsState<TState, TEvent>
     where Self: Sized
 {
-    type StateBuilder: StateBuilder<TState, TEvent>;
+    type BuildState: BuilderState<TState, TEvent>;
 
     fn transition_on(self, event: TEvent, next_state: TState) -> Result<Self, TState, TEvent>;
 
@@ -15,14 +15,14 @@ pub trait MultiTransitionBuilder<TState, TEvent>
         self,
         event: TEvent,
         next_state: TState,
-    ) -> Result<Self::StateBuilder, TState, TEvent>;
+    ) -> Result<Self::BuildState, TState, TEvent>;
 }
 
-impl<TState, TEvent> MultiTransitionBuilder<TState, TEvent> for StateMachineBuilder<TState, TEvent>
+impl<TState, TEvent> TransitionsState<TState, TEvent> for StateMachineBuilder<TState, TEvent>
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type StateBuilder = StateMachineBuilder<TState, TEvent>;
+    type BuildState = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
     fn transition_on(
@@ -38,7 +38,7 @@ impl<TState, TEvent> MultiTransitionBuilder<TState, TEvent> for StateMachineBuil
         mut self,
         event: TEvent,
         next_state: TState,
-    ) -> Result<Self::StateBuilder, TState, TEvent> {
+    ) -> Result<Self::BuildState, TState, TEvent> {
         self.add_transition_impl(
             self.current,
             event,

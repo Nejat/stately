@@ -1,3 +1,7 @@
+# Examples of State Machines 
+
+## Some email processing system
+
 ```mermaid
 stateDiagram-v2
     [*] --> Scheduled
@@ -16,39 +20,4 @@ stateDiagram-v2
     Invalid --> [*]
 ```
 
-```mermaid
-flowchart LR
-    A(((Start))) -- Schedule --> B(Scheduled)
-    B -- Process --> E(Processing)
-    E -- Succeed --> F(Sent)
-    F -- Verify --> H(Verifying)
-    H -- Succeed --> I(Successful)
-    H -- Fail --> G
-    E -- Fail --> G(Failed)
-    B -- Cancel --> D(Canceled)
-    A(((Start))) -- Invalid Request --> C(Invalid)
-    I --> Z((End))
-    G --> Z
-    D --> Z
-    C --> Z
-```
-
-```mermaid
-stateDiagram-v2
-    [*] --> A
-    A --> E
-    A --> B
-    B --> C
-    B --> G
-    B --> B1
-    B1 --> B1
-    C --> D
-    D --> F
-    D --> G
-    F --> [*]
-    C --> G
-    G --> [*]
-    E --> [*]
-    [*] --> H
-    H --> [*]
-```
+## Demonstration of State Machine w/Cycles

@@ -3,7 +3,7 @@
 State machine for processing emails.
 
 ```mermaid
-flowchart LR
+flowchart TD
     A(((Start))) -- Schedule --> B(Scheduled)
     B -- Process --> E(Processing)
     E -- Succeed --> F(Sent)
@@ -22,29 +22,28 @@ flowchart LR
 ```rust
     let email_state_machine = StateMachineBuilder::new(Initial)
         .add_start_state(Schedule, Scheduled)?
-            .no_triggers()
+            .only_trigger(started)
             .transition_on(Cancel, Canceled)?
             .final_transition_on(Process, Processing)?
         .add_end_state(Canceled)?
-            .no_triggers()
+            .only_trigger(completed)
         .add_state(Processing)?
-            .no_triggers()
+            .only_trigger(transitioned)
             .transition_on(Succeed, Sent)?
             .final_transition_on(Fail, Failed)?
         .add_state(Sent)?
-            .no_triggers()
+            .only_trigger(transitioned)
             .only_transition_on(Verify, Verifying)?
         .add_state(Verifying)?
-            .no_triggers()
+            .only_trigger(transitioned)
             .transition_on(Succeed, Successful)?
             .final_transition_on(Fail, Failed)?
         .add_end_state(Successful)?
-            .no_triggers()
+            .only_trigger(completed)
         .add_end_state(Failed)?
-            .no_triggers()
-        .add_start_state(InvalidRequest, Invalid)?
-            .also_end_state()
-            .no_triggers()
+            .only_trigger(completed)
+        .add_start_end_state(InvalidRequest, Invalid)?
+            .only_trigger(start_completed)
         .build()?;
 
     let mut email_state = email_state_machine.create();

@@ -1,6 +1,5 @@
 use std::borrow::BorrowMut;
 use std::collections::{HashMap, HashSet};
-use std::fmt::Debug;
 use std::hash::Hash;
 
 // https://www.geeksforgeeks.org/detect-cycle-in-a-graph/?ref=lbp
@@ -11,7 +10,7 @@ pub struct Graph<T> {
 }
 
 impl<T> Graph<T>
-    where T: Copy + Debug + Eq + Hash + PartialOrd + 'static
+    where T: Copy + Eq + Hash
 {
     const EXPECTED_NODE: &'static str = "all values should have an entry";
 

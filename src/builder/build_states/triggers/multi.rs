@@ -1,25 +1,25 @@
 use std::hash::Hash;
 
-use crate::builder::*;
+use crate::builder::TransitionState;
 use crate::StateMachineBuilder;
 
-pub trait MultiTriggerBuilder<TState, TEvent>
+pub trait TriggersState<TState, TEvent>
     where Self: Sized
 {
-    type TransitionBuilder: TransitionBuilder<TState, TEvent>;
+    type TransitionState: TransitionState<TState, TEvent>;
 
     #[must_use]
     fn trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self;
 
     #[must_use]
-    fn final_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::TransitionBuilder;
+    fn final_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::TransitionState;
 }
 
-impl<TState, TEvent> MultiTriggerBuilder<TState, TEvent> for StateMachineBuilder<TState, TEvent>
+impl<TState, TEvent> TriggersState<TState, TEvent> for StateMachineBuilder<TState, TEvent>
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type TransitionBuilder = StateMachineBuilder<TState, TEvent>;
+    type TransitionState = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
     fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self {
@@ -29,7 +29,7 @@ impl<TState, TEvent> MultiTriggerBuilder<TState, TEvent> for StateMachineBuilder
     }
 
     #[inline]
-    fn final_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::TransitionBuilder {
+    fn final_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::TransitionState {
         self.trigger_on_impl(self.current, trigger);
 
         self

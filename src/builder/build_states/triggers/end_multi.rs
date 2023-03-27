@@ -1,25 +1,25 @@
 use std::hash::Hash;
 
-use crate::builder::*;
+use crate::builder::BuilderState;
 use crate::StateMachineBuilder;
 
-pub trait MultiTriggerEndBuilder<TState, TEvent>
+pub trait EndTriggersState<TState, TEvent>
     where Self: Sized
 {
-    type StateBuilder: StateBuilder<TState, TEvent>;
+    type BuildState: BuilderState<TState, TEvent>;
 
     #[must_use]
     fn trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self;
 
     #[must_use]
-    fn final_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::StateBuilder;
+    fn final_trigger(self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::BuildState;
 }
 
-impl<TState, TEvent> MultiTriggerEndBuilder<TState, TEvent> for StateMachineBuilder<TState, TEvent>
+impl<TState, TEvent> EndTriggersState<TState, TEvent> for StateMachineBuilder<TState, TEvent>
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type StateBuilder = StateMachineBuilder<TState, TEvent>;
+    type BuildState = StateMachineBuilder<TState, TEvent>;
 
     #[inline]
     fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self {
@@ -29,7 +29,7 @@ impl<TState, TEvent> MultiTriggerEndBuilder<TState, TEvent> for StateMachineBuil
     }
 
     #[inline]
-    fn final_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::StateBuilder {
+    fn final_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::BuildState {
         self.trigger_on_impl(self.current, trigger);
 
         self
