@@ -1,0 +1,5 @@
+error[E0599]: no method named `build` found for associated type `<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState` in the current scope
+ --> src/tests/invalid/given_a_state_it_should_have_at_least_one_transition.rs:7:10
+  |
+7 |         .build()?;
+  |          ^^^^^ method not found in `<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState`

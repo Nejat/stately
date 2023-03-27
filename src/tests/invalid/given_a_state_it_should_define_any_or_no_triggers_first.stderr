@@ -1,0 +1,5 @@
+error[E0599]: no method named `only_transition_on` found for associated type `<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState` in the current scope
+ --> src/tests/invalid/given_a_state_it_should_define_any_or_no_triggers_first.rs:6:14
+  |
+6 |             .only_transition_on(Event::Next, State::Started).unwrap()
+  |              ^^^^^^^^^^^^^^^^^^ method not found in `<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState`

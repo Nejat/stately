@@ -1,0 +1,5 @@
+error[E0599]: no method named `add_state` found for opaque type `impl InitialState<State, Event>` in the current scope
+ --> src/tests/invalid/given_a_new_state_machine_builder_it_should_not_be_possible_to_add_a_normal_state_first.rs:5:10
+  |
+5 |         .add_state(State::Step42);
+  |          ^^^^^^^^^ method not found in `impl InitialState<State, Event>`
