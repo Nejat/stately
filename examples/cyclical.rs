@@ -84,7 +84,7 @@ fn main() -> Result<()> {
 }
 
 fn state_machine() -> BuilderResult {
-    return StateMachineBuilder::new(Initial)
+    return StateMachineBuilder::new()
         .add_start_state(Start, A)?
             .only_trigger(started)
             .transition_on(Done, E)?
@@ -99,7 +99,7 @@ fn state_machine() -> BuilderResult {
         .add_state(B1)?
             .only_trigger(transitioned)
             .only_transition_on(Next, D)?
-            .add_state(C)?
+        .add_state(C)?
             .only_trigger(transitioned)
             .only_transition_on(Next, D)?
         .add_state(D)?

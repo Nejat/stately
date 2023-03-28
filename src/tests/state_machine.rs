@@ -373,7 +373,7 @@ fn subject_under_test(
 ) -> (impl FiniteStateMachine<State, Event>, Rc<RefCell<u32>>) {
     let triggered = Rc::new(RefCell::new(0));
 
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .only_trigger(trigger_start(triggered.clone(), expect_trigger))
             .transition_on(Cycle, Loop).unwrap()
@@ -394,7 +394,7 @@ fn subject_under_test_multiple_triggers(
 ) -> (impl FiniteStateMachine<State, Event>, Rc<RefCell<u32>>) {
     let triggered = Rc::new(RefCell::new(0));
 
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .trigger(trigger_start(triggered.clone(), expect_trigger))
             .final_trigger(trigger_start(triggered.clone(), expect_trigger))
@@ -414,7 +414,7 @@ fn subject_under_test_multiple_triggers(
 }
 
 fn subject_under_test_without_cycles() -> impl FiniteStateMachine<State, Event> {
-    <StateMachineBuilder<State, Event>>::new(Initial)
+    StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()

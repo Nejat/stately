@@ -85,7 +85,7 @@ fn main() -> Result<()> {
 }
 
 fn email_state_machine() -> BuilderResult {
-    return StateMachineBuilder::new(Initial)
+    return StateMachineBuilder::new()
         .add_start_state(Schedule, Scheduled)?
             .only_trigger(started)
             .transition_on(Cancel, Canceled)?

@@ -41,11 +41,13 @@ pub struct StateMachineBuilder<TState, TEvent> {
 }
 
 impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
-    where TState: Copy + Eq + Hash,
+    where TState: Copy + Default + Eq + Hash,
           TEvent: Copy + Eq + Hash
 {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(initial_state: TState) -> impl InitialState<TState, TEvent> {
+    pub fn new() -> impl InitialState<TState, TEvent> {
+        let initial_state = TState::default();
+
         Self {
             current: initial_state,
             initial_state,

@@ -1,7 +1,7 @@
 use stately::builder::{Result, StateMachineBuilder};
 
 fn main() -> Result<(), State, Event> {
-    let _fsm = <StateMachineBuilder<State, Event>>::new(State::Initial).build()?;
+    let _fsm = StateMachineBuilder::new().build()?;
 
     Ok(())
 }

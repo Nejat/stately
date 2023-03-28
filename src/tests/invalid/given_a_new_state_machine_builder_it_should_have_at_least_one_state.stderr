@@ -1,5 +1,5 @@
-error[E0599]: no method named `build` found for opaque type `impl InitialState<State, Event>` in the current scope
- --> src/tests/invalid/given_a_new_state_machine_builder_it_should_have_at_least_one_state.rs:4:73
+error[E0599]: no method named `build` found for opaque type `impl InitialState<_, _>` in the current scope
+ --> src/tests/invalid/given_a_new_state_machine_builder_it_should_have_at_least_one_state.rs:4:43
   |
-4 |     let _fsm = <StateMachineBuilder<State, Event>>::new(State::Initial).build()?;
-  |                                                                         ^^^^^ method not found in `impl InitialState<State, Event>`
+4 |     let _fsm = StateMachineBuilder::new().build()?;
+  |                                           ^^^^^ method not found in `impl InitialState<_, _>`

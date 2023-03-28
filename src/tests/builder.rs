@@ -8,7 +8,7 @@ use crate::prelude::*;
 
 #[test]
 fn given_a_start_end_state_it_should_be_possible_to_define_multiple_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_end_state(Stop, Stopped).unwrap()
             .trigger(unreachable_placeholder_trigger)
             .final_trigger(unreachable_placeholder_trigger)
@@ -19,7 +19,7 @@ fn given_a_start_end_state_it_should_be_possible_to_define_multiple_triggers() {
 
 #[test]
 fn given_a_start_end_state_it_should_be_possible_to_define_no_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -36,7 +36,7 @@ fn given_a_start_end_state_it_should_be_possible_to_define_no_triggers() {
 
 #[test]
 fn given_a_start_end_state_it_should_be_possible_to_define_only_one_trigger() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_end_state(Stop, Stopped).unwrap()
             .only_trigger(unreachable_placeholder_trigger)
         .build();
@@ -46,7 +46,7 @@ fn given_a_start_end_state_it_should_be_possible_to_define_only_one_trigger() {
 
 #[test]
 fn given_a_start_state_it_should_be_possible_to_define_multiple_transitions() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .transition_on(Stop, Stopped).unwrap()
@@ -63,7 +63,7 @@ fn given_a_start_state_it_should_be_possible_to_define_multiple_transitions() {
 
 #[test]
 fn given_a_start_state_it_should_be_possible_to_define_multiple_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .trigger(unreachable_placeholder_trigger)
             .final_trigger(unreachable_placeholder_trigger)
@@ -77,7 +77,7 @@ fn given_a_start_state_it_should_be_possible_to_define_multiple_triggers() {
 
 #[test]
 fn given_a_start_state_it_should_be_possible_to_define_no_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()
@@ -90,7 +90,7 @@ fn given_a_start_state_it_should_be_possible_to_define_no_triggers() {
 
 #[test]
 fn given_a_start_state_it_should_be_possible_to_define_only_one_transition() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()
@@ -103,7 +103,7 @@ fn given_a_start_state_it_should_be_possible_to_define_only_one_transition() {
 
 #[test]
 fn given_a_start_state_it_should_be_possible_to_define_only_one_trigger() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .only_trigger(unreachable_placeholder_trigger)
             .only_transition_on(Stop, Stopped).unwrap()
@@ -116,7 +116,7 @@ fn given_a_start_state_it_should_be_possible_to_define_only_one_trigger() {
 
 #[test]
 fn given_a_state_it_should_be_possible_to_define_multiple_transitions() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -133,7 +133,7 @@ fn given_a_state_it_should_be_possible_to_define_multiple_transitions() {
 
 #[test]
 fn given_a_state_it_should_be_possible_to_define_multiple_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -151,7 +151,7 @@ fn given_a_state_it_should_be_possible_to_define_multiple_triggers() {
 
 #[test]
 fn given_a_state_it_should_be_possible_to_define_no_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -168,7 +168,7 @@ fn given_a_state_it_should_be_possible_to_define_no_triggers() {
 
 #[test]
 fn given_a_state_it_should_be_possible_to_define_only_one_transition() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .transition_on(Stop, Stopped).unwrap()
@@ -185,7 +185,7 @@ fn given_a_state_it_should_be_possible_to_define_only_one_transition() {
 
 #[test]
 fn given_a_state_it_should_be_possible_to_define_only_one_trigger() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -202,7 +202,7 @@ fn given_a_state_it_should_be_possible_to_define_only_one_trigger() {
 
 #[test]
 fn given_an_end_state_it_should_be_possible_to_define_multiple_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -220,7 +220,7 @@ fn given_an_end_state_it_should_be_possible_to_define_multiple_triggers() {
 
 #[test]
 fn given_an_end_state_it_should_be_possible_to_define_no_triggers() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -237,7 +237,7 @@ fn given_an_end_state_it_should_be_possible_to_define_no_triggers() {
 
 #[test]
 fn given_an_end_state_it_should_be_possible_to_define_only_one_trigger() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -254,7 +254,7 @@ fn given_an_end_state_it_should_be_possible_to_define_only_one_trigger() {
 
 #[test]
 fn given_an_initial_state_definition_should_not_build_fsm() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()
@@ -265,7 +265,7 @@ fn given_an_initial_state_definition_should_not_build_fsm() {
 
 #[test]
 fn given_an_undefined_state_should_not_build_fsm() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Next, Loop).unwrap()
@@ -283,7 +283,7 @@ fn given_an_undefined_state_should_not_build_fsm() {
 
 #[test]
 fn given_an_unreachable_state_should_not_build_fsm() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Cycle, Loop).unwrap()
@@ -306,7 +306,7 @@ fn given_an_unreachable_state_should_not_build_fsm() {
 
 #[test]
 fn given_duplicate_states_should_not_build_fsm() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()
@@ -319,7 +319,7 @@ fn given_duplicate_states_should_not_build_fsm() {
 
 #[test]
 fn given_duplicate_transitions_should_not_build_fsm() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .transition_on(Stop, Stopped).unwrap()
@@ -330,7 +330,7 @@ fn given_duplicate_transitions_should_not_build_fsm() {
 
 #[test]
 fn given_no_cycles_an_fsm_should_define_an_end_state() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Stop, Stopped).unwrap()
@@ -344,7 +344,7 @@ fn given_no_cycles_an_fsm_should_define_an_end_state() {
 
     assert!(!sut.create().has_cycles().unwrap());
 
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Next, Stopped).unwrap()
@@ -361,7 +361,7 @@ fn given_no_cycles_an_fsm_should_define_an_end_state() {
 
 #[test]
 fn given_no_end_states_fsm_should_define_a_cycle() {
-    let sut = <StateMachineBuilder<State, Event>>::new(Initial)
+    let sut = StateMachineBuilder::new()
         .add_start_state(Start, Started).unwrap()
             .no_triggers()
             .only_transition_on(Next, Loop).unwrap()

@@ -3,7 +3,7 @@ use stately::builder::{
 };
 
 fn main() -> Result<(), State, Event> {
-    let _fsm = <StateMachineBuilder<State, Event>>::new(State::Initial)
+    let _fsm = StateMachineBuilder::new()
         .add_start_state(Event::Start, State::Started).unwrap()
             .no_triggers()
             .only_transition_on(Event::Next, State::Started).unwrap()
