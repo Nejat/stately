@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
-use crate::builder::build_states::triggers::end_multi::EndTriggersState;
-use crate::builder::BuilderState;
+use crate::builder::{BuilderState, EndTriggersState};
 use crate::StateMachineBuilder;
 
 pub trait EndTriggerState<TState, TEvent> {

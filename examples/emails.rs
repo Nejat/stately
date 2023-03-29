@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+
 use thiserror::Error;
 
 use stately::{builder, state_machine};
@@ -6,8 +7,10 @@ use stately::builder::BuilderError;
 use stately::prelude::*;
 use stately::state_machine::StateError;
 
-use crate::EMailEvent::*;
-use crate::EMailState::*;
+use crate::EMailEvent::{Cancel, Fail, InvalidRequest, Process, Schedule, Succeed, Verify};
+use crate::EMailState::{
+    Canceled, Failed, Initial, Invalid, Processing, Scheduled, Sent, Successful, Verifying,
+};
 
 type Result<T> = std::result::Result<T, ExampleError>;
 type BuilderResult = builder::Result<StateMachineDefinition<EMailState, EMailEvent>, EMailState, EMailEvent>;
@@ -54,6 +57,21 @@ enum EMailState {
     Verifying,
 }
 
+impl Display for EMailState {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            Canceled => "Canceled",
+            Failed => "Failed",
+            Invalid => "Invalid",
+            Processing => "Processing",
+            Scheduled => "Scheduled",
+            Sent => "Sent",
+            Successful => "Successful",
+            Verifying => "Verifying",
+        }))
+    }
+}
 fn main() -> Result<()> {
     let email_state_machine = email_state_machine().map_err(ExampleError::Build)?;
     let mut email_state = email_state_machine.create();

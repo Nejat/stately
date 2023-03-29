@@ -1,12 +1,9 @@
 use std::hash::Hash;
 
-use crate::builder::{EndTriggerState, Result};
-use crate::builder::TriggerState;
+use crate::builder::{EndTriggerState, Result, TriggerState};
 use crate::StateMachineBuilder;
 
-pub trait InitialState<TState, TEvent>
-    where Self: Sized
-{
+pub trait InitialState<TState, TEvent> {
     type TriggerState: TriggerState<TState, TEvent>;
     type EndState: EndTriggerState<TState, TEvent>;
 

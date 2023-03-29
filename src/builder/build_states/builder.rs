@@ -7,9 +7,7 @@ use crate::builder::BuilderError::ValidationError;
 use crate::builder::Result;
 use crate::StateMachineBuilder;
 
-pub trait BuilderState<TState, TEvent>
-    where Self: Sized
-{
+pub trait BuilderState<TState, TEvent> {
     type EndState: EndTriggerState<TState, TEvent>;
     type StartState: TriggerState<TState, TEvent>;
 

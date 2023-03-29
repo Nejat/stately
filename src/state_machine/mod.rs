@@ -13,7 +13,7 @@ mod error;
 mod machine;
 mod result;
 
-pub trait FiniteStateMachine<TState, TEvent>: Deref {
+pub trait FiniteStateMachine<TState, TEvent>: Deref<Target=TState> {
     fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self;
 
     fn has_cycles(&mut self) -> Option<bool> {

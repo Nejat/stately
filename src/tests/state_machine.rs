@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use Event::{Cycle, Next, Start, Stop};
@@ -41,7 +42,7 @@ fn given_a_started_fsm_it_should_not_start_again() {
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     let transition = sut.start(Start);
@@ -50,38 +51,38 @@ fn given_a_started_fsm_it_should_not_start_again() {
 }
 
 #[test]
-fn given_an_fsm_a_transition_on_an_end_state_should_not_transition() {
+fn given_an_fsm_a_transition_on_an_end_state_should_not_transition_state() {
     let (mut sut, _triggered) = subject_under_test(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     assert!(matches!(sut.event(Start), Err(EndState { end: Stopped })));
 }
 
 #[test]
-fn given_an_fsm_an_event_should_transition() {
+fn given_an_fsm_an_event_should_transition_state() {
     let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     let triggered = *triggered.borrow();
@@ -90,14 +91,14 @@ fn given_an_fsm_an_event_should_transition() {
 }
 
 #[test]
-fn given_an_fsm_an_incorrect_event_should_not_transition() {
+fn given_an_fsm_an_incorrect_event_should_not_transition_state() {
     let (mut sut, _triggered) = subject_under_test(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     assert!(
@@ -107,7 +108,7 @@ fn given_an_fsm_an_incorrect_event_should_not_transition() {
 }
 
 #[test]
-fn given_an_fsm_clearing_trigger_should_not_trigger() {
+fn given_an_fsm_clearing_trigger_should_not_trigger_on_transition() {
     let (mut sut, triggered) = subject_under_test(CUSTOM_TRIGGERS);
 
     sut.clear_triggers();
@@ -116,28 +117,28 @@ fn given_an_fsm_clearing_trigger_should_not_trigger() {
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     let triggered = *triggered.borrow();
@@ -147,6 +148,107 @@ fn given_an_fsm_clearing_trigger_should_not_trigger() {
 
 #[test]
 fn given_an_fsm_it_should_be_possible_to_end() {
+    let (mut sut, _) = subject_under_test(DEFINED_TRIGGERS);
+
+    assert!(!sut.is_started());
+
+    sut.start(Start).unwrap();
+
+    assert_eq!(Started, *sut);
+    assert!(sut.is_started());
+
+    sut.event(Cycle).unwrap();
+
+    assert_eq!(Loop, *sut);
+
+    sut.event(Next).unwrap();
+
+    assert_eq!(Started, *sut);
+
+    sut.event(Stop).unwrap();
+
+    assert_eq!(Stopped, *sut);
+    assert!(sut.is_end());
+}
+
+#[test]
+fn given_an_fsm_it_should_start() {
+    let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
+
+    assert!(!sut.is_started());
+
+    sut.start(Start).unwrap();
+
+    assert_eq!(Started, *sut);
+    assert!(sut.is_started());
+
+    let triggered = *triggered.borrow();
+
+    assert_eq!(1, triggered);
+}
+
+#[test]
+fn given_an_fsm_resetting_it_should_start_again() {
+    let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
+
+    assert!(!sut.is_started());
+
+    sut.start(Start).unwrap();
+
+    assert_eq!(Started, *sut);
+    assert!(sut.is_started());
+
+    sut.event(Stop).unwrap();
+
+    assert_eq!(Stopped, *sut);
+    assert!(sut.is_end());
+
+    sut.reset();
+
+    assert!(!sut.is_started());
+
+    sut.start(Start).unwrap();
+
+    assert_eq!(Started, *sut);
+    assert!(sut.is_started());
+
+    sut.event(Stop).unwrap();
+
+    assert_eq!(Stopped, *sut);
+    assert!(sut.is_end());
+
+    let triggered = *triggered.borrow();
+
+    assert_eq!(4, triggered);
+}
+
+#[test]
+fn given_an_fsm_transitioning_through_states_it_should_be_possible_deref_current_state() {
+    let (mut sut, _) = subject_under_test(DEFINED_TRIGGERS);
+
+    assert!(!sut.is_started());
+
+    sut.start(Start).unwrap();
+
+    assert_eq!(Started, *sut);
+    assert!(sut.is_started());
+
+    sut.event(Cycle).unwrap();
+
+    assert_eq!(Loop, *sut);
+
+    sut.event(Next).unwrap();
+
+    assert_eq!(Started, *sut);
+
+    sut.event(Stop).unwrap();
+
+    assert_eq!(Stopped, *sut);
+    assert!(sut.is_end());
+}
+
+#[test]
+fn given_an_fsm_transitioning_through_states_it_should_be_possible_get_current_state() {
     let (mut sut, _) = subject_under_test(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
@@ -171,58 +273,7 @@ fn given_an_fsm_it_should_be_possible_to_end() {
 }
 
 #[test]
-fn given_an_fsm_it_should_start() {
-    let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
-
-    assert!(!sut.is_started());
-
-    sut.start(Start).unwrap();
-
-    assert_eq!(Started, sut.current_state());
-    assert!(sut.is_started());
-
-    let triggered = *triggered.borrow();
-
-    assert_eq!(1, triggered);
-}
-
-#[test]
-fn given_an_fsm_resetting_it_should_start_again() {
-    let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
-
-    assert!(!sut.is_started());
-
-    sut.start(Start).unwrap();
-
-    assert_eq!(Started, sut.current_state());
-    assert!(sut.is_started());
-
-    sut.event(Stop).unwrap();
-
-    assert_eq!(Stopped, sut.current_state());
-    assert!(sut.is_end());
-
-    sut.reset();
-
-    assert!(!sut.is_started());
-
-    sut.start(Start).unwrap();
-
-    assert_eq!(Started, sut.current_state());
-    assert!(sut.is_started());
-
-    sut.event(Stop).unwrap();
-
-    assert_eq!(Stopped, sut.current_state());
-    assert!(sut.is_end());
-
-    let triggered = *triggered.borrow();
-
-    assert_eq!(4, triggered);
-}
-
-#[test]
-fn given_an_fsm_with_custom_triggers_events_should_trigger() {
+fn given_an_fsm_with_custom_triggers_events_should_trigger_on_transition() {
     let custom_triggered = Rc::new(RefCell::new(false));
 
     let (mut sut, triggered) = subject_under_test(CUSTOM_TRIGGERS);
@@ -264,28 +315,28 @@ fn given_an_fsm_with_cycles_it_should_loop() {
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     let triggered = *triggered.borrow();
@@ -294,27 +345,27 @@ fn given_an_fsm_with_cycles_it_should_loop() {
 }
 
 #[test]
-fn given_an_fsm_with_multiple_triggers_events_should_trigger() {
+fn given_an_fsm_with_multiple_triggers_events_should_trigger_on_transition() {
     let (mut sut, triggered) = subject_under_test_multiple_triggers(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     let triggered = *triggered.borrow();
@@ -323,27 +374,27 @@ fn given_an_fsm_with_multiple_triggers_events_should_trigger() {
 }
 
 #[test]
-fn given_an_fsm_with_triggers_events_should_trigger() {
+fn given_an_fsm_with_triggers_events_should_trigger_on_transition() {
     let (mut sut, triggered) = subject_under_test(DEFINED_TRIGGERS);
 
     assert!(!sut.is_started());
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Cycle).unwrap();
 
-    assert_eq!(Loop, sut.current_state());
+    assert_eq!(Loop, *sut);
 
     sut.event(Next).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 
     let triggered = *triggered.borrow();
@@ -359,12 +410,12 @@ fn given_an_fsm_without_cycles_it_should_end() {
 
     sut.start(Start).unwrap();
 
-    assert_eq!(Started, sut.current_state());
+    assert_eq!(Started, *sut);
     assert!(sut.is_started());
 
     sut.event(Stop).unwrap();
 
-    assert_eq!(Stopped, sut.current_state());
+    assert_eq!(Stopped, *sut);
     assert!(sut.is_end());
 }
 
@@ -479,4 +530,15 @@ pub enum State {
     Started,
     Loop,
     Stopped,
+}
+
+impl Display for State {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            Started => "Started",
+            Loop => "Loop",
+            Stopped => "Stopped"
+        }))
+    }
 }

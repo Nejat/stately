@@ -1,5 +1,5 @@
 use stately::builder::{
-    BuilderState, InitialState, Result, StateMachineBuilder, TransitionState, TriggerState
+    BuilderState, InitialState, Result, StateMachineBuilder, TransitionState, TriggerState,
 };
 
 fn main() -> Result<(), State, Event> {

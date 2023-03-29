@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-use crate::builder::build_states::{EndTriggerState, TransitionState, TriggersState};
+use crate::builder::{EndTriggerState, TransitionState, TriggersState};
 use crate::StateMachineBuilder;
 
 pub trait StartTriggerState<TState, TEvent> {

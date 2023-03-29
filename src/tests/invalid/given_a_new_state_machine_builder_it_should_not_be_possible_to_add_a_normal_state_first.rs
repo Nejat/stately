@@ -14,5 +14,5 @@ pub enum Event {}
 enum State {
     #[default]
     Initial,
-    Step42
+    Step42,
 }

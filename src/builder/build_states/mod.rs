@@ -1,9 +1,9 @@
-pub use builder::*;
-pub use initial::*;
-pub use transitions::*;
-pub use triggers::*;
+pub use builder::BuilderState;
+pub use initial::InitialState;
+pub use transition::{TransitionsState, TransitionState};
+pub use trigger::{EndTriggersState, EndTriggerState, TriggersState, TriggerState};
 
 mod builder;
 mod initial;
-mod transitions;
-mod triggers;
+mod transition;
+mod trigger;

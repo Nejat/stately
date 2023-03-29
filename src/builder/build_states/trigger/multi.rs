@@ -3,9 +3,7 @@ use std::hash::Hash;
 use crate::builder::TransitionState;
 use crate::StateMachineBuilder;
 
-pub trait TriggersState<TState, TEvent>
-    where Self: Sized
-{
+pub trait TriggersState<TState, TEvent> {
     type TransitionState: TransitionState<TState, TEvent>;
 
     #[must_use]

@@ -23,7 +23,7 @@ mod result;
 
 bitflags! {
     #[derive(Copy, Clone)]
-    pub struct NodeType: u8 {
+    pub(crate) struct NodeType: u8 {
         const END   = 0b10;
         const START = 0b01;
         const STATE = 0b00;
@@ -45,6 +45,7 @@ impl<TState, TEvent> StateMachineBuilder<TState, TEvent>
           TEvent: Copy + Eq + Hash
 {
     #[allow(clippy::new_ret_no_self)]
+    #[must_use]
     pub fn new() -> impl InitialState<TState, TEvent> {
         let initial_state = TState::default();
 

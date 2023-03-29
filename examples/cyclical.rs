@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+
 use thiserror::Error;
 
 use stately::{builder, state_machine};
@@ -6,8 +7,8 @@ use stately::builder::BuilderError;
 use stately::prelude::*;
 use stately::state_machine::StateError;
 
-use crate::Event::*;
-use crate::State::*;
+use crate::Event::{Done, Loop, Next, Skip, Start};
+use crate::State::{A, B, B1, C, D, E, F, G, H, Initial};
 
 type Result<T> = std::result::Result<T, ExampleError>;
 type BuilderResult = builder::Result<StateMachineDefinition<State, Event>, State, Event>;
@@ -53,6 +54,22 @@ enum State {
     H,
 }
 
+impl Display for State {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            A => "A",
+            B => "B",
+            B1 => "B1",
+            C => "C",
+            D => "D",
+            E => "E",
+            F => "F",
+            G => "G",
+            H => "H",
+        }))
+    }
+}
 fn main() -> Result<()> {
     let state_machine = state_machine().map_err(ExampleError::Build)?;
     let mut state = state_machine.create();

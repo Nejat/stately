@@ -1,13 +1,10 @@
 use std::hash::Hash;
 
-use crate::builder::build_states::TransitionsState;
-use crate::builder::BuilderState;
+use crate::builder::{BuilderState, TransitionsState};
 use crate::builder::Result;
 use crate::StateMachineBuilder;
 
-pub trait TransitionState<TState, TEvent>
-    where Self: Sized
-{
+pub trait TransitionState<TState, TEvent> {
     type MultiState: TransitionsState<TState, TEvent>;
     type BuildState: BuilderState<TState, TEvent>;
 

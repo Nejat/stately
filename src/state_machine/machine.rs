@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::empty;
 use std::ops::Deref;
@@ -8,7 +7,7 @@ use std::rc::Rc;
 use crate::{FiniteStateMachine, Trigger};
 use crate::state_machine::{Result, StateMachineDefinition};
 use crate::state_machine::StateError::{
-    AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted
+    AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted,
 };
 
 const ALL_STATES_WITH_TRANSITIONS: &str = "all states should have defined transitions";
@@ -19,10 +18,7 @@ pub struct StateMachine<TState, TEvent> {
     pub(crate) definition: StateMachineDefinition<TState, TEvent>,
 }
 
-impl<TState, TEvent> Deref for StateMachine<TState, TEvent>
-    where TEvent: Copy + Eq + Hash,
-          TState: Copy + Eq + Hash
-{
+impl<TState, TEvent> Deref for StateMachine<TState, TEvent> {
     type Target = TState;
 
     fn deref(&self) -> &Self::Target {
@@ -31,7 +27,7 @@ impl<TState, TEvent> Deref for StateMachine<TState, TEvent>
 }
 
 impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState, TEvent>
-    where TState: Copy + Debug + Eq + Hash,
+    where TState: Copy + Eq + Hash,
           TEvent: Copy + Eq + Hash
 {
     fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self {
@@ -105,7 +101,7 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
 
         if !self.definition.transitions.get(&self.definition.initial_state)
             .expect(ALL_STATES_WITH_TRANSITIONS).contains_key(&event) {
-            return Err(NotAStartEvent { event })
+            return Err(NotAStartEvent { event });
         }
 
         self.transition_on(event)
@@ -113,8 +109,8 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
 }
 
 impl<TState, TEvent> StateMachine<TState, TEvent>
-    where TEvent: Copy + Eq + Hash,
-          TState: Copy + Debug + Eq + Hash
+    where TState: Copy + Eq + Hash,
+          TEvent: Copy + Eq + Hash
 {
     fn transition_on(&mut self, event: TEvent) -> Result<TState, TState, TEvent> {
         if self.is_end() {

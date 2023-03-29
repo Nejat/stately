@@ -8,7 +8,7 @@ pub enum StateError<TState, TEvent> {
     EndState { end: TState },
     NotAStartEvent { event: TEvent },
     NotStarted,
-    InvalidTransition { event: TEvent, current_state: TState }
+    InvalidTransition { event: TEvent, current_state: TState },
 }
 
 impl<TState, TEvent> Display for StateError<TState, TEvent>
@@ -18,7 +18,7 @@ impl<TState, TEvent> Display for StateError<TState, TEvent>
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AlreadyStarted =>
-            fmt.write_fmt(format_args!("State machine is already started")),
+                fmt.write_fmt(format_args!("State machine is already started")),
 
             Self::EndState { end } =>
                 fmt.write_fmt(format_args!("Reached end state {end}")),

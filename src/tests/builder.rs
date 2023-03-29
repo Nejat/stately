@@ -1,8 +1,10 @@
+use std::fmt::{Display, Formatter};
+
 use Event::{Cycle, Next, Start, Stop};
 use State::{Initial, Loop, Started, Stopped};
 
 use crate::builder::BuilderError::{
-    RedefinedInitialState, StateAlreadyDefined, TransitionAlreadyDefined, ValidationError
+    RedefinedInitialState, StateAlreadyDefined, TransitionAlreadyDefined, ValidationError,
 };
 use crate::prelude::*;
 
@@ -396,4 +398,15 @@ pub enum State {
     Started,
     Loop,
     Stopped,
+}
+
+impl Display for State {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            Started => "Started",
+            Loop => "Loop",
+            Stopped => "Stopped"
+        }))
+    }
 }
