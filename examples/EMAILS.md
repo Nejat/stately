@@ -58,12 +58,15 @@ cargo run --package stately --bin emails
 ```
 
 ### Example Output
+
 Successful conclusion
+
 ```
 ◉ |Schedule| → Scheduled ━ |Process| → Processing ━ |Succeed| → Sent ━ |Verify| → Verifying ━ |Succeed| → Successful ●
 ```
 
 Invalid conclusion
+
 ```
 ◉ |InvalidRequest| → Invalid ●
 ```

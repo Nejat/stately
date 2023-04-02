@@ -2,18 +2,39 @@ use std::fmt::{Debug, Display, Formatter};
 
 use thiserror::Error;
 
+/// The [`Error`] type for [`StateMachineBuilder`] operations
+///
+/// [`Error`]: std::error::Error
+/// [`StateMachineBuilder`]: crate::StateMachineBuilder
 #[derive(Error, Debug)]
 pub enum BuilderError<TState, TEvent> {
+    /// Occurs when the initial state of `TState` is redefined
+    ///
+    /// _*_ `TState` _implements_ [`Default`]_, which is used as the initial state_
     RedefinedInitialState,
+
+    /// Occurs when a `TState` is redefined for an existing state definition
     StateAlreadyDefined {
+        /// Existing `TState` definition
         state: TState
     },
+
+    /// Occurs when a transition on `TEvent` is defined for an existing transition
     TransitionAlreadyDefined {
+        /// `TEvent` to transition on
         event: TEvent,
+
+        /// Existing `TState` to transition to
         existing: TState,
     },
+
+    /// Occurs when a state machine definition build fails validation
     ValidationError {
+        /// A collection of all the expected `TState`s that are undefined
         undefined_states: Vec<TState>,
+
+        /// A collection of all defined `TState`s that are unreachable,
+        /// _i.e._ there are no transitions to the state
         unreachable: Vec<TState>,
     },
 }

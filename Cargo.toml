@@ -5,6 +5,7 @@ edition = "2021"
 repository = "https://github.com/Nejat/stately"
 description = "Finite State Machine"
 authors = ["nejatoz@gmail.com"]
+license = "MIT or Apache 2.0"
 keywords = ["fsm", "finite-state-machine", "state-machine"]
 categories = ["Algorithms", "Rust Patterns"]
 

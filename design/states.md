@@ -1,4 +1,4 @@
-# Examples of State Machines 
+# Example of State Machines
 
 ## Some email processing system
 

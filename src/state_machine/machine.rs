@@ -13,6 +13,7 @@ use crate::Trigger;
 
 const ALL_STATES_WITH_TRANSITIONS: &str = "all states should have defined transitions";
 
+// StateMachineBuilder built implementation of a FiniteStateMachine trait object
 pub struct StateMachine<TState, TEvent> {
     pub(crate) current_state: TState,
     pub(crate) has_cycle: Option<bool>,
@@ -22,7 +23,15 @@ pub struct StateMachine<TState, TEvent> {
 impl<TState, TEvent> StateMachine<TState, TEvent>
     where TState: Copy
 {
-    // initializes a new instance with a StateMachineDefinition
+    /// Initializes a new instance of a state machine
+    ///
+    /// # Arguments
+    ///
+    /// * _`definition`_ - an instance of state machine definition
+    ///
+    /// # Results
+    ///
+    /// Returns a new initialized instance of a state machine
     pub const fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self {
         Self {
             current_state: definition.initial_state,

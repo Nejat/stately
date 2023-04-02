@@ -7,14 +7,15 @@ stateDiagram-v2
     A --> B
     B --> C
     B --> G
-    B --> B1
-    B1 --> B1
+    C --> G
     C --> D
+    G --> [*]
+    B --> B1
+    B1 --> D
     D --> F
+    D --> B
     D --> G
     F --> [*]
-    C --> G
-    G --> [*]
     E --> [*]
     [*] --> H
     H --> [*]
@@ -64,12 +65,15 @@ cargo run --package stately --bin cyclical
 ```
 
 ### Example Output
+
 Successful conclusion
+
 ```
 ◉ |Start| → A ━ |Next| → B ━ |Next| → C ━ |Next| → D ━ |Next| → F ●
 ```
 
 Invalid conclusion
+
 ```
 ◉ |Skip| → H ●
 ```

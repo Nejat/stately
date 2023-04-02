@@ -8,27 +8,135 @@ use crate::builder::BuilderError::ValidationError;
 use crate::builder::Result;
 use crate::StateMachineDefinition;
 
+/// The final builder in the state machine builder's phased build states
+///
+/// The final builder lets you to define more states or build
+/// the state machine definition
+///
+/// ### Generic Data Types
+///
+/// * _`TState`_ - represents the states of a state machine
+/// * _`TEvent`_ - represents the transition events of a state machine
 pub trait BuilderState<TState, TEvent> {
+    /// Associates the next build phase for end states
     type EndState: EndTriggerState<TState, TEvent>;
 
+    /// Associates the next build phase for all other states
     type TriggerState: TriggerState<TState, TEvent>;
 
+    /// Defines an end state
+    ///
+    /// An end state indicates that a state machine has completed.
+    ///
+    /// _* a state machine can have multiple end points_
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - a new end state
+    ///
+    /// # Results
+    ///
+    /// Returns the [`EndTriggerState`] builder phase if there aren't
+    /// any validation errors
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`BuildError`] if there are any validation errors
+    ///
+    /// [`BuildError`]: crate::builder::BuilderError
     fn add_end_state(self, state: TState) -> Result<Self::EndState, TState, TEvent>;
 
+    /// Defines a start state and it's starting transition
+    ///
+    /// A start state is an initial entry point into the state machine.
+    ///
+    /// _* a state machine can have multiple entry points_
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - the event that starts the state machine
+    /// * `state` - the start state that the state machine transitions to
+    ///
+    /// # Results
+    ///
+    /// Returns the [`TriggerState`] builder phase if there aren't
+    /// any validation errors
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`BuildError`] if there are any validation errors
+    ///
+    /// [`BuildError`]: crate::builder::BuilderError
     fn add_start_state(
         self,
         event: TEvent,
         state: TState,
     ) -> Result<Self::TriggerState, TState, TEvent>;
 
+    /// Defines a start state, which is also an end state, and it's starting transition
+    ///
+    /// A start/end state is both an initial entry point into the state machine and an
+    /// end state of the state machine.
+    ///
+    /// _* a state machine can have multiple entry and end points_
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - the event that starts and ends the state machine
+    /// * `state` - the start/end state that the state machine transitions to
+    ///
+    /// # Results
+    ///
+    /// Returns the [`EndTriggerState`] builder phase if there aren't
+    /// any validation error
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`BuildError`] if there are any validation errors
+    ///
+    /// [`BuildError`]: crate::builder::BuilderError
     fn add_start_end_state(
         self,
         event: TEvent,
         state: TState,
     ) -> Result<Self::EndState, TState, TEvent>;
 
+    /// Defines a state
+    ///
+    /// A state is one of the finite number of intermediary states in a
+    /// state machine.
+    ///
+    /// _* a state machine can have multiple intermediary states_
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - defined state
+    ///
+    /// # Results
+    ///
+    /// Returns the [`TriggerState`] builder phase if there aren't
+    /// any validation errors
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`BuildError`] if there are any validation errors
+    ///
+    /// [`BuildError`]: crate::builder::BuilderError
     fn add_state(self, state: TState) -> Result<Self::TriggerState, TState, TEvent>;
 
+    /// Builds a validated instance of a [`StateMachineDefinition`]
+    ///
+    /// # Results
+    ///
+    /// Returns an instance of a [`StateMachineDefinition`] if there
+    /// aren't any validation errors
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`BuildError`] if there are any validation errors
+    ///
+    /// [`BuildError`]: crate::builder::BuilderError
+    /// [`StateMachineDefinition`]: StateMachineDefinition
     fn build(self) -> Result<StateMachineDefinition<TState, TEvent>, TState, TEvent>;
 }
 

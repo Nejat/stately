@@ -6,7 +6,9 @@ use std::hash::Hash;
 
 /// Directed graph, used for detecting cycles
 ///
-/// _adapted to Rust from [Detect Cycle in a Directed Graph](https://www.geeksforgeeks.org/detect-cycle-in-a-graph)_
+/// _adapted to Rust from [Detect Cycle in a Directed Graph]_
+///
+/// [Detect Cycle in a Directed Graph]: https://www.geeksforgeeks.org/detect-cycle-in-a-graph
 pub struct Graph<T> {
     v: usize,
     adj: HashMap<T, HashSet<T>>,
@@ -19,7 +21,15 @@ impl<T> Graph<T>
 
     /// Creates a new [Graph] from a collection of nodes
     ///
-    /// # Examples
+    /// # Arguments
+    ///
+    /// * _`nodes`_ - an iterator of all the nodes of the graph
+    ///
+    /// # Results
+    ///
+    /// Returns an initialized instance of a `Graph`
+    ///
+    /// # Example
     ///
     /// ```rust,ignore
     /// # use crate::graph::Graph;
@@ -47,12 +57,16 @@ impl<T> Graph<T>
 
     /// Defines an edge, source > destination, of a directed graph
     ///
+    /// # Arguments
+    ///
+    /// * _`src`_ - source node
+    /// * _`dest`_ - destination node
+    ///
     /// # Example
     ///
     /// ```rust,ignore
     /// # use crate::graph::Graph;
     /// # use Node::{StateA, StateB, StateC};
-    ///
     /// let mut graph = Graph::new(vec![StateA, StateB, StateC]);
     ///
     /// graph.add_edge(StateA, StateB);
@@ -75,12 +89,16 @@ impl<T> Graph<T>
 
     // Checks if directed graph has any cycles
     ///
+    /// # Results
+    ///
+    /// Returns a `true` if the graph has any cycles defined,
+    /// a `false` otherwise
+    ///
     /// # Example
     ///
     /// ```rust,ignore
     /// # use crate::graph::Graph;
     /// # use Node::{StateA, StateB, StateC};
-    ///
     /// let mut graph = Graph::new(vec![StateA, StateB, StateC]);
     ///
     /// graph.add_edge(StateA, StateB);
@@ -111,6 +129,17 @@ impl<T> Graph<T>
         false
     }
 
+    /// Recursively searches for cycles in the directed graph
+    ///
+    /// # Arguments
+    ///
+    /// * _`visited`_ - a mutable reference to a history of visited nodes
+    /// * _`stack`_ - a mutable reference to a collection of nodes that can
+    /// indicate a cycle in the current searched branch
+    ///
+    /// # Results
+    ///
+    /// Returns a `true` if a cycle is detected, `false` otherwise
     fn is_cyclical_util(
         &self, node: T,
         visited: &mut HashSet<T>,
