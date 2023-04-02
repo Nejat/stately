@@ -165,8 +165,8 @@ enum State {
 * [x] ~~Refactor; apply stricter clippy rules; a.k.a "Clippify" project~~
 * [x] ~~detect cyclical loops~~
 * [x] ~~Add unit tests~~
-* [ ] Rust Docs
-* [x] Add working example
+* [x] ~~Rust Docs~~
+* [ ] Add working example
 
 *  ### `Feature` gated expansion;
 
