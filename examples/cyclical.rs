@@ -13,63 +13,6 @@ use crate::State::{A, B, B1, C, D, E, F, G, H, Initial};
 type Result<T> = std::result::Result<T, ExampleError>;
 type BuilderResult = builder::Result<StateMachineDefinition<State, Event>, State, Event>;
 
-#[derive(Error, Debug)]
-enum ExampleError {
-    Build(BuilderError<State, Event>),
-    StateMachine(StateError<State, Event>),
-}
-
-impl Display for ExampleError {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ExampleError::Build(err) =>
-                fmt.write_fmt(format_args!("Build: {err:?}")),
-            ExampleError::StateMachine(err) =>
-                fmt.write_fmt(format_args!("FSM: {err:?}")),
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub enum Event {
-    Done,
-    Loop,
-    Next,
-    Skip,
-    Start,
-}
-
-#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash)]
-enum State {
-    #[default]
-    Initial,
-    A,
-    B,
-    B1,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-}
-
-impl Display for State {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        fmt.write_fmt(format_args!("{}", match self {
-            Initial => "Initial",
-            A => "A",
-            B => "B",
-            B1 => "B1",
-            C => "C",
-            D => "D",
-            E => "E",
-            F => "F",
-            G => "G",
-            H => "H",
-        }))
-    }
-}
 fn main() -> Result<()> {
     let state_machine = state_machine().map_err(ExampleError::Build)?;
     let mut state = state_machine.create();
@@ -128,7 +71,7 @@ fn state_machine() -> BuilderResult {
             .only_trigger(completed)
         .add_end_state(G)?
             .only_trigger(completed)
-            .add_start_end_state(Skip, H)?
+        .add_start_end_state(Skip, H)?
             .only_trigger(start_completed)
         .build();
 
@@ -151,8 +94,7 @@ fn state_machine() -> BuilderResult {
 
 fn demonstrate_state_machine(
     email_state: &mut impl FiniteStateMachine<State, Event>,
-) -> state_machine::Result<(), State, Event>
-{
+) -> state_machine::Result<(), State, Event> {
     let current_state = email_state.current_state();
 
     assert_eq!(Initial, current_state);
@@ -221,5 +163,63 @@ fn demonstrate_state_machine(
         sut: &impl FiniteStateMachine<State, Event>,
     ) {
         assert!(sut.next_states().all(|itm| expected.contains(&itm)));
+    }
+}
+
+#[derive(Error, Debug)]
+enum ExampleError {
+    Build(BuilderError<State, Event>),
+    StateMachine(StateError<State, Event>),
+}
+
+impl Display for ExampleError {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExampleError::Build(err) =>
+                fmt.write_fmt(format_args!("Build: {err:?}")),
+            ExampleError::StateMachine(err) =>
+                fmt.write_fmt(format_args!("FSM: {err:?}")),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Event {
+    Done,
+    Loop,
+    Next,
+    Skip,
+    Start,
+}
+
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash)]
+enum State {
+    #[default]
+    Initial,
+    A,
+    B,
+    B1,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+}
+
+impl Display for State {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            A => "A",
+            B => "B",
+            B1 => "B1",
+            C => "C",
+            D => "D",
+            E => "E",
+            F => "F",
+            G => "G",
+            H => "H",
+        }))
     }
 }

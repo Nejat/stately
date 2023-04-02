@@ -1,5 +1,5 @@
-error[E0599]: no method named `build` found for associated type `<<<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState as TransitionState<State, Event>>::BuildState as BuilderState<State, Event>>::EndState` in the current scope
+error[E0599]: no method named `build` found for associated type `<<<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState as TransitionState<State, Event>>::BuilderState as BuilderState<State, Event>>::EndState` in the current scope
   --> src/tests/invalid/given_an_end_state_it_should_define_any_or_no_triggers.rs:11:10
    |
 11 |         .build()?;
-   |          ^^^^^ method not found in `<<<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState as TransitionState<State, Event>>::BuildState as BuilderState<State, Event>>::EndState`
+   |          ^^^^^ method not found in `<<<<impl InitialState<State, Event> as InitialState<State, Event>>::TriggerState as TriggerState<State, Event>>::TransitionState as TransitionState<State, Event>>::BuilderState as BuilderState<State, Event>>::EndState`

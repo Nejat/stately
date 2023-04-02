@@ -47,7 +47,7 @@ fn given_a_started_fsm_it_should_not_start_again() {
 
     let transition = sut.start(Start);
 
-    assert!(matches!(transition, Err(AlreadyStarted)));
+    assert!(matches!(transition, Err(AlreadyStarted { current_state: Started })));
 }
 
 #[test]

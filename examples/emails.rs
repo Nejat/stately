@@ -15,63 +15,6 @@ use crate::EMailState::{
 type Result<T> = std::result::Result<T, ExampleError>;
 type BuilderResult = builder::Result<StateMachineDefinition<EMailState, EMailEvent>, EMailState, EMailEvent>;
 
-#[derive(Error, Debug)]
-enum ExampleError {
-    Build(BuilderError<EMailState, EMailEvent>),
-    StateMachine(StateError<EMailState, EMailEvent>),
-}
-
-impl Display for ExampleError {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ExampleError::Build(err) =>
-                fmt.write_fmt(format_args!("Build: {err:?}")),
-            ExampleError::StateMachine(err) =>
-                fmt.write_fmt(format_args!("FSM: {err:?}")),
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub enum EMailEvent {
-    Cancel,
-    InvalidRequest,
-    Process,
-    Fail,
-    Succeed,
-    Schedule,
-    Verify,
-}
-
-#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash)]
-enum EMailState {
-    Canceled,
-    Failed,
-    #[default]
-    Initial,
-    Invalid,
-    Processing,
-    Scheduled,
-    Sent,
-    Successful,
-    Verifying,
-}
-
-impl Display for EMailState {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        fmt.write_fmt(format_args!("{}", match self {
-            Initial => "Initial",
-            Canceled => "Canceled",
-            Failed => "Failed",
-            Invalid => "Invalid",
-            Processing => "Processing",
-            Scheduled => "Scheduled",
-            Sent => "Sent",
-            Successful => "Successful",
-            Verifying => "Verifying",
-        }))
-    }
-}
 fn main() -> Result<()> {
     let email_state_machine = email_state_machine().map_err(ExampleError::Build)?;
     let mut email_state = email_state_machine.create();
@@ -217,5 +160,63 @@ fn demonstrate_state_machine(
         sut: &impl FiniteStateMachine<EMailState, EMailEvent>,
     ) {
         assert!(sut.next_states().all(|itm| expected.contains(&itm)));
+    }
+}
+
+#[derive(Error, Debug)]
+enum ExampleError {
+    Build(BuilderError<EMailState, EMailEvent>),
+    StateMachine(StateError<EMailState, EMailEvent>),
+}
+
+impl Display for ExampleError {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExampleError::Build(err) =>
+                fmt.write_fmt(format_args!("Build: {err:?}")),
+            ExampleError::StateMachine(err) =>
+                fmt.write_fmt(format_args!("FSM: {err:?}")),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum EMailEvent {
+    Cancel,
+    InvalidRequest,
+    Process,
+    Fail,
+    Succeed,
+    Schedule,
+    Verify,
+}
+
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash)]
+enum EMailState {
+    Canceled,
+    Failed,
+    #[default]
+    Initial,
+    Invalid,
+    Processing,
+    Scheduled,
+    Sent,
+    Successful,
+    Verifying,
+}
+
+impl Display for EMailState {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_fmt(format_args!("{}", match self {
+            Initial => "Initial",
+            Canceled => "Canceled",
+            Failed => "Failed",
+            Invalid => "Invalid",
+            Processing => "Processing",
+            Scheduled => "Scheduled",
+            Sent => "Sent",
+            Successful => "Successful",
+            Verifying => "Verifying",
+        }))
     }
 }

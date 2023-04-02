@@ -1,11 +1,11 @@
 use std::hash::Hash;
 
-use crate::builder::{EndTriggerState, TransitionState, TriggersState};
-use crate::StateMachineBuilder;
+use crate::builder::{TransitionState, TriggersState};
+use crate::builder::builder::StateMachineBuilder;
 
 pub trait TriggerState<TState, TEvent> {
-    type EndState: EndTriggerState<TState, TEvent>;
     type MultiState: TriggersState<TState, TEvent>;
+
     type TransitionState: TransitionState<TState, TEvent>;
 
     #[must_use]
@@ -22,9 +22,8 @@ impl<TState, TEvent> TriggerState<TState, TEvent> for StateMachineBuilder<TState
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type EndState = StateMachineBuilder<TState, TEvent>;
-    type MultiState = StateMachineBuilder<TState, TEvent>;
-    type TransitionState = StateMachineBuilder<TState, TEvent>;
+    type MultiState = Self;
+    type TransitionState = Self;
 
     #[inline]
     fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::MultiState {
@@ -39,7 +38,10 @@ impl<TState, TEvent> TriggerState<TState, TEvent> for StateMachineBuilder<TState
     }
 
     #[inline]
-    fn only_trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self::TransitionState {
+    fn only_trigger(
+        mut self,
+        trigger: impl Fn(TEvent, TState, TState) + 'static,
+    ) -> Self::TransitionState {
         self.trigger_on_impl(self.current, trigger);
 
         self

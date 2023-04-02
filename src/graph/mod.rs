@@ -111,8 +111,11 @@ impl<T> Graph<T>
         false
     }
 
-    /// Recursively searches for cycles in the directed graph
-    fn is_cyclical_util(&self, node: T, visited: &mut HashSet<T>, stack: &mut HashSet<T>) -> bool {
+    fn is_cyclical_util(
+        &self, node: T,
+        visited: &mut HashSet<T>,
+        stack: &mut HashSet<T>,
+    ) -> bool {
         if stack.contains(&node) {
             return true;
         }

@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
+use crate::builder::builder::StateMachineBuilder;
 use crate::builder::TransitionState;
-use crate::StateMachineBuilder;
 
 pub trait TriggersState<TState, TEvent> {
     type TransitionState: TransitionState<TState, TEvent>;
@@ -17,7 +17,7 @@ impl<TState, TEvent> TriggersState<TState, TEvent> for StateMachineBuilder<TStat
     where TState: Copy + Eq + Hash,
           TEvent: Eq + Hash,
 {
-    type TransitionState = StateMachineBuilder<TState, TEvent>;
+    type TransitionState = Self;
 
     #[inline]
     fn trigger(mut self, trigger: impl Fn(TEvent, TState, TState) + 'static) -> Self {

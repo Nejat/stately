@@ -1,5 +1,5 @@
-pub use builder::TransitionState;
+pub use initial::TransitionState;
 pub use multi::TransitionsState;
 
-mod builder;
+mod initial;
 mod multi;

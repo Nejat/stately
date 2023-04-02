@@ -20,7 +20,7 @@ pub use state_machine::{detect_cycles, FiniteStateMachine, StateMachineDefinitio
 
 // type TransitionPredicate<TState> = Box<dyn Fn(TState) -> bool>;
 
-type Trigger<TState, TEvent> = Box<dyn Fn(TEvent, TState, TState)>;
+pub type Trigger<TState, TEvent> = Box<dyn Fn(TEvent, TState, TState)>;
 
 pub mod builder;
 mod graph;
@@ -29,9 +29,9 @@ pub mod state_machine;
 pub mod prelude {
     pub use super::builder::{
         BuilderState, EndTriggersState, EndTriggerState, InitialState,
-        TransitionsState, TransitionState, TriggersState, TriggerState,
+        StateMachineBuilder, TransitionsState, TransitionState, TriggersState,
+        TriggerState,
     };
-    pub use super::builder::StateMachineBuilder;
     pub use super::state_machine::{detect_cycles, FiniteStateMachine, StateMachineDefinition};
 }
 

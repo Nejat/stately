@@ -4,11 +4,12 @@ use std::iter::empty;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::{FiniteStateMachine, Trigger};
 use crate::state_machine::{Result, StateMachineDefinition};
+use crate::state_machine::fsm::FiniteStateMachine;
 use crate::state_machine::StateError::{
     AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted,
 };
+use crate::Trigger;
 
 const ALL_STATES_WITH_TRANSITIONS: &str = "all states should have defined transitions";
 
@@ -16,6 +17,19 @@ pub struct StateMachine<TState, TEvent> {
     pub(crate) current_state: TState,
     pub(crate) has_cycle: Option<bool>,
     pub(crate) definition: StateMachineDefinition<TState, TEvent>,
+}
+
+impl<TState, TEvent> StateMachine<TState, TEvent>
+    where TState: Copy
+{
+    // initializes a new instance with a StateMachineDefinition
+    pub const fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self {
+        Self {
+            current_state: definition.initial_state,
+            has_cycle: None,
+            definition,
+        }
+    }
 }
 
 impl<TState, TEvent> Deref for StateMachine<TState, TEvent> {
@@ -30,20 +44,6 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
     where TState: Copy + Eq + Hash,
           TEvent: Copy + Eq + Hash
 {
-    fn new(definition: StateMachineDefinition<TState, TEvent>) -> Self {
-        Self {
-            current_state: definition.initial_state,
-            has_cycle: None,
-            definition,
-        }
-    }
-
-    fn has_cycles(&mut self) -> Option<bool> {
-        self.has_cycle.get_or_insert(crate::detect_cycles(&self.definition));
-
-        self.has_cycle
-    }
-
     fn clear_triggers(&mut self) {
         self.definition.triggers = Rc::new(HashMap::default());
     }
@@ -58,6 +58,12 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
         }
 
         self.transition_on(event)
+    }
+
+    fn has_cycles(&mut self) -> Option<bool> {
+        self.has_cycle.get_or_insert(crate::detect_cycles(&self.definition));
+
+        self.has_cycle
     }
 
 
@@ -96,7 +102,9 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
 
     fn start(&mut self, event: TEvent) -> Result<TState, TState, TEvent> {
         if self.is_started() {
-            return Err(AlreadyStarted);
+            return Err(AlreadyStarted {
+                current_state: self.current_state
+            });
         }
 
         if !self.definition.transitions.get(&self.definition.initial_state)
