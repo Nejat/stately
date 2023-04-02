@@ -31,6 +31,7 @@ fn main() -> Result<()> {
     println!("re-run, hey! hey! hey!, demonstration with custom triggers");
 
     state.reset();
+
     state.new_triggers(
         vec![
             (F, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
@@ -38,7 +39,8 @@ fn main() -> Result<()> {
             (G, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
             (E, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
         ]
-    );
+    )
+        .map_err(ExampleError::StateMachine)?;
 
     demonstrate_state_machine(&mut state).map_err(ExampleError::StateMachine)
 }

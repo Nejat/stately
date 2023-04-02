@@ -40,7 +40,8 @@ fn main() -> Result<()> {
             (Failed, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
             (Canceled, vec![Box::new(|_, _, state| println!("◉ {state:?} ●"))]),
         ]
-    );
+    )
+        .map_err(ExampleError::StateMachine)?;
 
     demonstrate_state_machine(&mut email_state).map_err(ExampleError::StateMachine)
 }

@@ -22,6 +22,7 @@ use crate::state_machine::StateMachineDefinition;
 /// ```rust
 /// use std::default::Default;
 ///
+/// use stately::detect_cycles;
 /// use stately::prelude::*;
 ///
 /// fn main() {

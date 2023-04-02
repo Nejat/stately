@@ -29,6 +29,18 @@ pub enum StateError<TState, TEvent> {
         end: TState
     },
 
+    /// Occurs when an undefined [`event`] operation, for the
+    /// current state, is attempted on a state machine
+    ///
+    /// [`event`]: crate::FiniteStateMachine::event
+    InvalidTransition {
+        /// the invalid event
+        event: TEvent,
+
+        /// the current state of the machine
+        current_state: TState,
+    },
+
     /// Occurs when attempting to [`start`] a state machine
     /// with and an invalid event
     ///
@@ -44,21 +56,16 @@ pub enum StateError<TState, TEvent> {
     /// [`event`]: crate::FiniteStateMachine::event
     NotStarted,
 
-    /// Occurs when an undefined [`event`] operation, for the
-    /// current state, is attempted on a state machine
-    ///
-    /// [`event`]: crate::FiniteStateMachine::event
-    InvalidTransition {
-        /// the invalid event
-        event: TEvent,
-
-        /// the current state of the machine
-        current_state: TState,
-    },
+    /// Occurs when new triggers are defined for undefined
+    /// states
+    UndefinedStates {
+        /// the collection of undefined states
+        states: Vec<TState>
+    }
 }
 
 impl<TState, TEvent> Display for StateError<TState, TEvent>
-    where TState: Display,
+    where TState: Debug + Display,
           TEvent: Display,
 {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
@@ -71,14 +78,17 @@ impl<TState, TEvent> Display for StateError<TState, TEvent>
             Self::EndState { end } =>
                 fmt.write_fmt(format_args!("Reached end state {end}")),
 
+            Self::InvalidTransition { event, current_state } =>
+                fmt.write_fmt(format_args!("Can not transition from {current_state} on {event}")),
+
             Self::NotAStartEvent { event } =>
                 fmt.write_fmt(format_args!("{event} is not a starting event")),
 
             Self::NotStarted =>
                 fmt.write_fmt(format_args!("State machine is not started")),
 
-            Self::InvalidTransition { event, current_state } =>
-                fmt.write_fmt(format_args!("Can not transition from {current_state} on {event}")),
+            Self::UndefinedStates { states } =>
+                fmt.write_fmt(format_args!("{states:?} are not defined states"))
         }
     }
 }

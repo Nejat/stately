@@ -7,7 +7,7 @@ use std::rc::Rc;
 use crate::state_machine::{Result, StateMachineDefinition};
 use crate::state_machine::fsm::FiniteStateMachine;
 use crate::state_machine::StateError::{
-    AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted,
+    AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted, UndefinedStates
 };
 use crate::Trigger;
 
@@ -84,10 +84,31 @@ impl<TState, TEvent> FiniteStateMachine<TState, TEvent> for StateMachine<TState,
         self.current_state != self.definition.initial_state
     }
 
-    fn new_triggers(&mut self, triggers: Vec<(TState, Vec<Trigger<TState, TEvent>>)>) {
+    fn new_triggers(
+        &mut self,
+        triggers: Vec<(TState, Vec<Trigger<TState, TEvent>>)>
+    ) -> Result<(), TState, TEvent> {
+        let undefined_states = triggers.iter()
+            .filter_map(|(state, _)|
+                if self.definition.transitions.contains_key(state) {
+                    None
+                } else {
+                    Some(*state)
+                }
+            )
+            .collect::<Vec<TState>>();
+
+        if !undefined_states.is_empty() {
+            return Err(UndefinedStates {
+                states: undefined_states
+            });
+        }
+
         self.clear_triggers();
 
         self.definition.triggers = Rc::new(triggers.into_iter().collect());
+
+        Ok(())
     }
 
     fn next_states<'a>(&'a self) -> Box<dyn Iterator<Item=(&'a TEvent, &'a TState)> + 'a> {

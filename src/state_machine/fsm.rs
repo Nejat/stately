@@ -85,10 +85,19 @@ pub trait FiniteStateMachine<TState, TEvent>: Deref<Target=TState> {
     /// _** does not impact the triggers of the shared_ [`StateMachineDefinition`]
     /// _instance_
     ///
+    /// # Errors
+    ///
+    /// Returns a [`StateError`] if there are any triggers defined for undefined states
+    ///
+    /// _* see_ [`StateError`] _for more details_
+    ///
+    /// [`StateError`]: state_machine::StateError::UndefinedStates
     /// [`Trigger`]: Trigger
     /// [`StateMachineDefinition`]: crate::StateMachineDefinition
-    // todo: this needs to validate triggers were not defined for end states and only valid states
-    fn new_triggers(&mut self, triggers: Vec<(TState, Vec<Trigger<TState, TEvent>>)>);
+    fn new_triggers(
+        &mut self,
+        triggers: Vec<(TState, Vec<Trigger<TState, TEvent>>)>
+    ) -> state_machine::Result<(), TState, TEvent>;
 
     /// Gets all of the valid transition edges of the state machine
     ///

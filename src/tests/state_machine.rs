@@ -3,10 +3,12 @@ use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use Event::{Cycle, Next, Start, Stop};
-use State::{Initial, Loop, Started, Stopped};
+use State::{Initial, Loop, Started, Stopped, Undefined};
 
 use crate::prelude::*;
-use crate::state_machine::StateError::{AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted};
+use crate::state_machine::StateError::{
+    AlreadyStarted, EndState, InvalidTransition, NotAStartEvent, NotStarted, UndefinedStates
+};
 
 const DEFINED_TRIGGERS: bool = true;
 const CUSTOM_TRIGGERS: bool = false;
@@ -273,7 +275,7 @@ fn given_an_fsm_transitioning_through_states_it_should_be_possible_get_current_s
 }
 
 #[test]
-fn given_an_fsm_with_custom_triggers_events_should_trigger_on_transition() {
+fn given_an_fsm_with_custom_triggers_should_trigger_on_transition() {
     let custom_triggered = Rc::new(RefCell::new(false));
 
     let (mut sut, triggered) = subject_under_test(CUSTOM_TRIGGERS);
@@ -292,7 +294,7 @@ fn given_an_fsm_with_custom_triggers_events_should_trigger_on_transition() {
                 }
             })
         ])
-    ]);
+    ]).unwrap();
 
     sut.start(Start).unwrap();
 
@@ -305,6 +307,20 @@ fn given_an_fsm_with_custom_triggers_events_should_trigger_on_transition() {
     let custom_triggered = *custom_triggered.borrow();
 
     assert!(custom_triggered);
+}
+
+#[test]
+fn given_an_fsm_with_custom_triggers_for_undefined_states_should_fail_to_customize_trigger() {
+    let (mut sut, _triggered) = subject_under_test(CUSTOM_TRIGGERS);
+
+    let err = sut.new_triggers(vec![
+        (Undefined, vec![Box::new(|_event, _previous, _next| unreachable!())])
+    ]);
+
+    assert!(matches!(
+        err,
+        Err(UndefinedStates { states }) if states.contains(&Undefined) && states.len() == 1
+    ))
 }
 
 #[test]
@@ -527,9 +543,10 @@ pub enum Event {
 pub enum State {
     #[default]
     Initial,
-    Started,
     Loop,
+    Started,
     Stopped,
+    Undefined
 }
 
 impl Display for State {
@@ -538,7 +555,8 @@ impl Display for State {
             Initial => "Initial",
             Started => "Started",
             Loop => "Loop",
-            Stopped => "Stopped"
+            Stopped => "Stopped",
+            Undefined => "Undefined",
         }))
     }
 }
